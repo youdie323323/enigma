@@ -1,6 +1,6 @@
 {
     "license": "SEE LICENSE IN LICENSE",
-    "private": true,
+    "private": false,
     "author": "youdi3",
     "scripts": {
         "test": "jest --forceExit",
