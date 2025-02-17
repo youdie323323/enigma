@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "lib": ["esnext"],
+    "module": "Node16",
+    "target": "ES6",
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node16",
+    "noImplicitAny": false,
+    "strictNullChecks": false
+  }
+}

@@ -1,0 +1,1 @@
+export type Bytecode = Array<number>;
