@@ -39,6 +39,14 @@ import { Compiler, ProgramBuilder } from "jsvm";
 })();
 ```
 
+## Bug
+
+If you have any issue with builded intepreter code, open an issue with compile your code.
+
 ## Credits
 
 - Some of codebase are inspired/taken from [js-confuser](https://github.com/MichaelXF/js-confuser) (thanks, [michael](https://github.com/MichaelXF)!)
+
+## License 
+
+MIT License
