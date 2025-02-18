@@ -71,7 +71,6 @@ export default class Compiler {
    * Global memory store where global setted memory goes.
    * 
    * @remarks
-   * 
    * Similar to something like window.something .
    * Global variables doesnt have number id or something to identify, so we can just use Set to store them.
    */
