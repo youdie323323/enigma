@@ -1,4 +1,4 @@
-# Javascript VM Obfuscator
+# Javascript Enigma VM Obfuscator
 The **first** published javascript virtual machine obfuscator
 
 ## Intepreter
