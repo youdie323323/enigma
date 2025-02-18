@@ -1,6 +1,16 @@
 # Javascript Enigma VM Obfuscator
 The **first** published javascript virtual machine obfuscator
 
+## Core functions
+
+This tool provides the ability to run any javascript code on an interpreter built on javascript.
+The following information is lost in the compiled javascript code:
+- variable names
+- differences in while statements
+- labels
+- lot more
+Thus, it virtually irreversible to completely restore the original javascript code.
+
 ## Intepreter
 
 This enigma virtual machine's intepreter is recreation of [KASADA's virtual machine](https://accounts.nike.com/149e9513-01fa-4fb0-aad4-566afd725d1b/2d206a39-8ed7-437e-a3be-862e0f06eea3/ips.js).  
