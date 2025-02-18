@@ -69,9 +69,9 @@ export default class Parser {
 
     babelTraverse(ast, {
       Block(path) {
-        let functionDeclarations = [];
-        let reservedFunctionPaths = [];
-        let otherStatements = [];
+        const functionDeclarations = [];
+        const reservedFunctionPaths = [];
+        const otherStatements = [];
 
         path.traverse({
           // This might need fix
