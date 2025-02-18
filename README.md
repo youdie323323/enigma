@@ -3,7 +3,8 @@ The **first** published javascript virtual machine obfuscator
 
 ## Intepreter
 
-This virtual machine's intepreter is recreation of [KASADA's virtual machine](https://accounts.nike.com/149e9513-01fa-4fb0-aad4-566afd725d1b/2d206a39-8ed7-437e-a3be-862e0f06eea3/ips.js).
+This virtual machine's intepreter is recreation of [KASADA's virtual machine](https://accounts.nike.com/149e9513-01fa-4fb0-aad4-566afd725d1b/2d206a39-8ed7-437e-a3be-862e0f06eea3/ips.js).  
+
 
 ## API Usage
 
@@ -47,6 +48,7 @@ If you have any bugs with your code, [open an issue](https://github.com/youdie32
 
 - Some of codebase are inspired/taken from [js-confuser](https://github.com/MichaelXF/js-confuser) (thanks, [michael](https://github.com/MichaelXF)!)
 - Additionally, issue templates are taken from [webcrack](https://github.com/j4k0xb/webcrack) (thanks, [j4k0xb](https://github.com/j4k0xb) too!)
+- Thanks also to [umasi](https://github.com/umasii) for creating the [article](https://www.nullpt.rs/devirtualizing-nike-vm-1) and [repository](https://github.com/umasii/ips-disassembler) about KASADA vm.
 
 ## License 
 
