@@ -783,7 +783,7 @@ export default class Compiler {
    * @remarks
    * Need to return the register and allow it to be consumed only once.
    * 
-   * @returns The result register.
+   * @returns The result register
    */
   private compileExpression(expr: t.Expression): Register {
     switch (true) {
