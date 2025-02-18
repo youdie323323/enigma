@@ -13,7 +13,7 @@ import { type Bytecode } from "./Bytecode/Bytecode";
 const LICENSE_PATTERN = /(?:^[!@]|^@(?:preserve|license|copyright)|^\s*(?:MIT|MPL|GPL|LGPL|BSD|ISC|Apache|UNLICENSED)\b|\([Cc]\)|[Ll]icen[cs]e|[Cc]opyright|\u00A9)/m;
 
 /**
- * Builder that constructs intepreter.
+ * Builder that constructs interpreter.
  */
 export default class ProgramBuilder {
     private variableGenerator: VariableGenerator = new VariableGenerator();
@@ -50,10 +50,10 @@ export default class ProgramBuilder {
     }
 
     /**
-     * Build the javascript intepreter from bytecode.
+     * Build the javascript interpreter from bytecode.
      * 
      * @param bytecode - The compiled bytecode
-     * @returns The intepreter code in javascript
+     * @returns The interpreter code in javascript
      */
     public async build(bytecode: Bytecode): Promise<string> {
         this.variableGenerator.reset();

@@ -58,7 +58,7 @@ export default class BytecodeTranscoderProvider {
      */
     private static readonly LATIN_BASIC_TABLE: Array<string> = [
         // Everything work fine when delete dollar symbol, why?
-        // This is maybe issue with intepreter code, because decode chechsum working fine
+        // This is maybe issue with interpreter code, because decode chechsum working fine
         // Use "-" temporary
         // '$', 
         "-",
