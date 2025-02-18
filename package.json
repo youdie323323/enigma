@@ -8,8 +8,12 @@
         "vm",
         "obfuscation",
         "protection",
+        "interpreter",
         "virtual-machine",
-        "obfuscator"
+        "obfuscator",
+        "jsvm",
+        "kasada",
+        "jsvmp"
     ],
     "homepage": "https://github.com/youdie323323/js-enigma-vm#readme",
     "bugs": {
