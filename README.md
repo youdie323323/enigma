@@ -46,6 +46,7 @@ If you have any issue with builded intepreter code, open an issue with compile y
 ## Credits
 
 - Some of codebase are inspired/taken from [js-confuser](https://github.com/MichaelXF/js-confuser) (thanks, [michael](https://github.com/MichaelXF)!)
+- Additionally, issue templates are taken from [webcrack](https://github.com/j4k0xb/webcrack) (thanks, [j4k0xb](https://github.com/j4k0xb) too!)
 
 ## License 
 
