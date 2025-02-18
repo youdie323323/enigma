@@ -9,7 +9,7 @@ This virtual machine's intepreter is recreation of [KASADA's virtual machine](ht
 
 ### Installation
 ```bash
-$ npm install js-confuser
+$ npm install jsvm
 ```
 
 ### Usage
