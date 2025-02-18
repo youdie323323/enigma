@@ -52,7 +52,7 @@ const babelOptions: TransformOptions = {
 };
 
 /**
- * Function for transform code with babel.
+ * Transform code to compilable code with babel.
  */
 const transformCode = (code: string): BabelFileResult => transformSync(code, babelOptions);
 
