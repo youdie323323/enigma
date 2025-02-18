@@ -4,7 +4,7 @@ The **first** published javascript virtual machine obfuscator
 ## Core functions
 
 This tool provides the ability to run any javascript code on an interpreter built on javascript.
-The following information is lost in the compiled javascript code:
+The following information is lost in the compilation:
 - variable names
 - differences in while statements
 - labels
