@@ -1,4 +1,4 @@
-import { createRegister, Register } from "../Compiler/Register/Register";
+import { createRegister, type Register } from "../Compiler/Register/Register";
 import { shuffle, chance } from "../Utils/Random";
 
 export type NumOpCodes = 62;

@@ -1,4 +1,4 @@
-import { Node } from '@babel/types';
+import { type Node } from '@babel/types';
 
 const isNode = (target: any): target is Node =>
     target && typeof target.type === 'string';

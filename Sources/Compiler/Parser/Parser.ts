@@ -2,7 +2,7 @@ import * as t from '@babel/types';
 import { parse } from '@babel/parser';
 import babelTraverse from '@babel/traverse';
 import { traverse as customTraverse } from './ParserTraverse';
-import { BabelFileResult, TransformOptions, transformSync } from "@babel/core";
+import { type BabelFileResult, type TransformOptions, transformSync } from "@babel/core";
 import { chance, getRandomString } from '../../Utils/Random';
 import UniqueIdentifier from '../CompilerUniqueIdentifier';
 
@@ -134,7 +134,7 @@ export default class Parser {
       // _regeneratorRuntime() -> _regeneratorRuntime
       CallExpression(path) {
         if (
-          t.isIdentifier(path.node.callee, { name: REGENERATOR_RUNTIME_FUNCTION_IDENTIFIER }) && 
+          t.isIdentifier(path.node.callee, { name: REGENERATOR_RUNTIME_FUNCTION_IDENTIFIER }) &&
           path.node.arguments.length === 0
         ) {
           path.replaceWith(path.node.callee);

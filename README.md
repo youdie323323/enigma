@@ -1,36 +1,33 @@
-# Javascript Enigma VM Obfuscator
+# JavaScript Enigma VM Obfuscator
 
-The **first** published javascript virtual machine obfuscator
+🚀 **The first publicly available JavaScript Virtual Machine obfuscator**
 
-## Core functions
+This tool allows you to run JavaScript code on a custom-built JavaScript interpreter, effectively making reverse engineering harder.
 
-This tool provides the ability to run any javascript code on an interpreter built on javascript.
-The following information is lost in the compilation:
+## 🎯 Features
 
-- Variable names
-- Differences in while statements
-- Labels
-- Lot more...
+🔒 **Obfuscation that truly hides your code**
+- Eliminates variable names
+- Hides structural differences in loops
+- Obscures labels
+- And much more...
 
-Thus, it virtually irreversible to completely restore the original javascript code.
+🛡️ **Virtually irreversible**
+- The compiled output is extremely difficult to restore to its original form.
 
-## Examples
+## 📌 How It Works
 
-See obfuscated example under `examples` folder.
+JavaScript Enigma VM obfuscates your code by compiling it into a custom bytecode format that runs on an embedded virtual machine.
 
-## Interpreter
-
-This enigma virtual machine's interpreter is recreation of [KASADA's virtual machine](https://accounts.nike.com/149e9513-01fa-4fb0-aad4-566afd725d1b/2d206a39-8ed7-437e-a3be-862e0f06eea3/ips.js).
-
-## API Usage
+## 🚀 Quick Start
 
 ### Installation
 
 ```bash
-$ npm install js-enigma-vm
+npm install js-enigma-vm
 ```
 
-### Usage
+### Usage Example
 
 ```ts
 import { Compiler, ProgramBuilder } from "js-enigma-vm";
@@ -51,23 +48,31 @@ import { Compiler, ProgramBuilder } from "js-enigma-vm";
   compiler.compile(input);
 
   const bytecode = compiler.constructBytecode();
-
   const code = await new ProgramBuilder().build(bytecode);
 
   console.log(code);
 })();
 ```
 
-## Bug
+## 🔍 Example
 
-If you have any bugs with your code, [open an issue](https://github.com/youdie323323/js-enigma-vm/issues/new?template=bug_report.yml).
+Check out the `examples` folder for more sample code!
 
-## Credits
+## 🎭 Interpreter
 
-- Big thanks to [umasi](https://github.com/umasii) for creating the [article](https://www.nullpt.rs/devirtualizing-nike-vm-1) and [repository](https://github.com/umasii/ips-disassembler) about KASADA vm.
-- Some of codebase are inspired/taken from [js-confuser](https://github.com/MichaelXF/js-confuser) (thanks, [michael](https://github.com/MichaelXF)!)
-- Additionally, issue templates are taken from [webcrack](https://github.com/j4k0xb/webcrack) (thanks, [j4k0xb](https://github.com/j4k0xb) too!)
+This Enigma Virtual Machine is a recreation of [KASADA's virtual machine](https://accounts.nike.com/149e9513-01fa-4fb0-aad4-566afd725d1b/2d206a39-8ed7-437e-a3be-862e0f06eea3/ips.js).
 
-## License
+## 🐞 Found a Bug?
 
-MIT License
+If you encounter any issues, please [open an issue](https://github.com/youdie323323/js-enigma-vm/issues/new?template=bug_report.yml)!
+
+## 🙌 Credits
+
+A huge thank you to:
+- [umasi](https://github.com/umasii) for creating the [article](https://www.nullpt.rs/devirtualizing-nike-vm-1) and [repository](https://github.com/umasii/ips-disassembler) about KASADA VM.
+- [MichaelXF](https://github.com/MichaelXF) for inspiration from [js-confuser](https://github.com/MichaelXF/js-confuser).
+- [j4k0xb](https://github.com/j4k0xb) for the issue templates from [webcrack](https://github.com/j4k0xb/webcrack).
+
+## 📜 License
+
+This project is licensed under the **MIT License**.
