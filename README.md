@@ -1,6 +1,6 @@
 # JavaScript Enigma VM Obfuscator
 
-🚀 **The first publicly available JavaScript Virtual Machine obfuscator**
+🚀 **The first publicly available better javaScript virtual machine obfuscator**
 
 This tool allows you to run JavaScript code on a custom-built JavaScript interpreter, effectively making reverse engineering harder.
 
