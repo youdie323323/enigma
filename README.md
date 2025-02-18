@@ -16,7 +16,7 @@ Thus, it virtually irreversible to completely restore the original javascript co
 
 ## Examples
 
-See compiled example under `examples` folder.
+See obfuscated example under `examples` folder.
 
 ## Interpreter
 
