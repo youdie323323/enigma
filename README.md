@@ -9,6 +9,7 @@ The following information is lost in the compilation:
 - differences in while statements
 - labels
 - lot more  
+
 Thus, it virtually irreversible to completely restore the original javascript code.
 
 ## Intepreter
