@@ -41,7 +41,7 @@ import { Compiler, ProgramBuilder } from "js-enigma-vm";
 
 ## Bug
 
-If you have any issue with builded intepreter code, open an issue with compile your code.
+If you have any issue with builded intepreter code, open an issue.
 
 ## Credits
 
