@@ -1,4 +1,7 @@
-# JavaScript Enigma VM Obfuscator
+[![npm](https://img.shields.io/npm/v/js-enigma-vm)](https://www.npmjs.com/package/js-enigma-vm)
+[![license](https://img.shields.io/github/license/youdie323323/js-enigma-vm)](https://github.com/youdie323323/js-enigma-vm/blob/master/LICENSE)
+
+<h1 align="center">enigma</h1>
 
 🚀 **The first publicly available better javaScript virtual machine obfuscator**
 
