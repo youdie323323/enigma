@@ -1,5 +1,5 @@
-# Javascript VM Obfuscation
-The **first** published javascript virtual machine obfuscation
+# Javascript VM Obfuscator
+The **first** published javascript virtual machine obfuscator
 
 ## Intepreter
 
