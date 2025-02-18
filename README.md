@@ -8,7 +8,7 @@ The following information is lost in the compilation:
 - variable names
 - differences in while statements
 - labels
-- lot more
+- lot more  
 Thus, it virtually irreversible to completely restore the original javascript code.
 
 ## Intepreter
