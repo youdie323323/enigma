@@ -59,7 +59,7 @@ import { Compiler, ProgramBuilder } from "js-enigma-vm";
 
 ## 🔍 Example
 
-Check out the `examples` folder for more sample code!
+Check out the `examples` folder for sample compiled code!
 
 ## 🎭 Interpreter
 
