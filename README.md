@@ -9,12 +9,12 @@ This virtual machine's intepreter is recreation of [KASADA's virtual machine](ht
 
 ### Installation
 ```bash
-$ npm install js-vm-obfuscator
+$ npm install js-enigma-vm
 ```
 
 ### Usage
 ```ts
-import { Compiler, ProgramBuilder } from "js-vm-obfuscator";
+import { Compiler, ProgramBuilder } from "js-enigma-vm";
 
 (async function () {
     const compiler = new Compiler();
