@@ -1,5 +1,5 @@
 import { deepEqual, ok } from "assert";
-import Template from "../../Templates/Template";
+import Template from "../../ProgramBuilder/Templates/Template";
 import { shuffle } from "../../Utils/Random";
 import { type Bytecode } from "./Bytecode";
 import { Category, generateRandomStringFromCategory } from "./BytecodeUnicodeRanges";

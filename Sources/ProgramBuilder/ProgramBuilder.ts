@@ -1,10 +1,10 @@
-import Template from "../Templates/Template";
+import Template from "./Templates/Template";
 import VariableGenerator from "./ProgramBuilderVariableGenerator";
 import { shuffle } from "../Utils/Random";
 import generate from "@babel/generator";
 import * as t from '@babel/types';
 import { transformSync } from "@babel/core";
-import regeneratorRuntimeTemplate from "../Templates/Regenerator";
+import regeneratorRuntimeTemplate from "./Templates/Regenerator";
 import { OperatorCode, FUNCTION_RESULT_REG, generateASTInstructionHandlers } from "../Instruction";
 import BytecodeTranscoderProvider from "./Bytecode/BytecodeTranscoderProvider";
 import unraw from "unraw";

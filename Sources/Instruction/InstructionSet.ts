@@ -1,4 +1,4 @@
-import Template from "../Templates/Template";
+import Template from "../ProgramBuilder/Templates/Template";
 import {
     default as Instruction,
     ARGUMENTS_REG,

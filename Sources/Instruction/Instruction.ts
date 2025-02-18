@@ -1,4 +1,4 @@
-import Template from "../Templates/Template";
+import Template from "../ProgramBuilder/Templates/Template";
 import { OperatorCode } from "./";
 
 export default interface Instruction {

@@ -3,7 +3,7 @@ import { parse } from "@babel/parser";
 import traverse from "@babel/traverse";
 import { NodePath } from "@babel/traverse";
 import { ok } from "assert";
-import { getRandomString } from "../Utils/Random";
+import { getRandomString } from "../../Utils/Random";
 
 type Templates = babelTypes.Node | babelTypes.Node[] | Template;
 
