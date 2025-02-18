@@ -22,7 +22,7 @@ body:
     attributes:
       label: Code
       description: The whole code to compile (paste a link if it's too long).
-      placeholder: console['\x6c\x6f\x67']('\x61');
+      placeholder: console.log("hello");
       render: JavaScript
     validations:
       required: true
