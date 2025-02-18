@@ -8,9 +8,9 @@ This tool provides the ability to run any javascript code on an interpreter buil
 The following information is lost in the compilation:
 
 - Variable names
-- Vifferences in while statements
+- Differences in while statements
 - Labels
-- Lot more
+- Lot more...
 
 Thus, it virtually irreversible to completely restore the original javascript code.
 
