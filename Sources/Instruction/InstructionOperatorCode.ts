@@ -29,6 +29,7 @@ function nextLiteralId(): number {
     // 25 << 1 = 50
     currentLiteralId += 3.8;
   }
+  
   return currentLiteralId << 1
 }
 

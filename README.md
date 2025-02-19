@@ -5,7 +5,8 @@
 
 🚀 **The first publicly available better javaScript virtual machine obfuscator**
 
-This tool allows you to run JavaScript code on a custom-built JavaScript interpreter, effectively making reverse engineering harder.
+This tool allows you to run JavaScript code on a custom-built JavaScript interpreter, effectively making reverse engineering harder.  
+In a nutshell, i called this as **javascript version of webassembly**.
 
 ## 🎯 Features
 
