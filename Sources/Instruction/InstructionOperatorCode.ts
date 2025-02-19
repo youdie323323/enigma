@@ -1,5 +1,5 @@
 import { createRegister, type Register } from "../Compiler/Register/Register";
-import { shuffle, chance } from "../Utils/Random";
+import { shuffle } from "../ProgramBuilder/Bytecode/BytecodeTranscoderProvider";
 
 export type NumOpCodes = 62;
 export const NUM_OP_CODES = 61 + 1;
@@ -13,6 +13,15 @@ function getRandomId() {
   }
 
   return availableID[currentIdIndex++];
+}
+
+/**
+ * Returns a true/false randomly.
+ * 
+ * @param percentChance - A percentage chance, (0 - 100)%
+ */
+const chance = (percentChance: number): boolean => {
+  return Math.random() < percentChance / 100;
 }
 
 let currentLiteralId: number = Math.floor(Math.random() * 6) + 1;

@@ -1,8 +1,11 @@
 import { deepEqual, ok } from "assert";
 import Template from "../../ProgramBuilder/Templates/Template";
-import { shuffle } from "../../Utils/Random";
 import { type Bytecode } from "./Bytecode";
 import { Category, generateRandomStringFromCategory } from "./BytecodeUnicodeRanges";
+
+export const shuffle = <T>(array: T[]): T[] => {
+    return array.toSorted(() => Math.random() - 0.5);
+}
 
 export default class BytecodeTranscoderProvider {
     private static readonly REPLACEABLE_CHARSET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";

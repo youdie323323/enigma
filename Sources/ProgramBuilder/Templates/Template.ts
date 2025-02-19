@@ -3,7 +3,6 @@ import { parse } from "@babel/parser";
 import traverse from "@babel/traverse";
 import { NodePath } from "@babel/traverse";
 import { ok } from "assert";
-import { getRandomString } from "../../Utils/Random";
 
 type Templates = babelTypes.Node | babelTypes.Node[] | Template;
 
@@ -20,7 +19,7 @@ export default class Template {
   private defaultVariables: TemplateVariables;
   private requiredVariables: Set<string>;
   private astVariableMappings: Map<string, string>;
-  private astIdentifierPrefix = "__t_" + getRandomString(6);
+  private astIdentifierPrefix = "__t_" + Math.random().toString(32).slice(2);
 
   constructor(...templates: string[]) {
     this.templates = templates;
@@ -71,7 +70,7 @@ export default class Template {
       let value = allVariables[name] as string;
 
       if (this.isASTVariable(value)) {
-        let astIdentifierName = this.astIdentifierPrefix + name;
+        const astIdentifierName = this.astIdentifierPrefix + name;
         this.astVariableMappings.set(name, astIdentifierName);
 
         value = astIdentifierName;

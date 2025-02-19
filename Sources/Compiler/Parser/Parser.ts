@@ -3,7 +3,6 @@ import { parse } from '@babel/parser';
 import babelTraverse from '@babel/traverse';
 import { traverse as customTraverse } from './ParserTraverse';
 import { type BabelFileResult, type TransformOptions, transformSync } from "@babel/core";
-import { chance, getRandomString } from '../../Utils/Random';
 import UniqueIdentifier from '../CompilerUniqueIdentifier';
 
 interface BaseNode {
@@ -150,9 +149,17 @@ export default class Parser {
     babelTraverse(ast, {
       // Add fake condition
       BlockStatement(path) {
-        if (chance(5)) {
+        if (Math.random() < 0.05) {
+          const generateRandomAlphabet = (length: number): string => {
+            let result = "";
+            for (let i = 0; i < length; i++) {
+              result += String.fromCharCode(97 + Math.floor(26 * Math.random()));
+            }
+            return result;
+          };
+
           const generateUniqueLiteral = (length: number, exclude: string): string => {
-            const uniqueLiteral = getRandomString(length);
+            const uniqueLiteral = generateRandomAlphabet(length);
             if (uniqueLiteral === exclude) {
               return generateUniqueLiteral(length, exclude);
             }
@@ -160,7 +167,7 @@ export default class Parser {
             return uniqueLiteral;
           };
 
-          const shouldInvertBoolean = chance(50);
+          const shouldInvertBoolean = Math.random() < 0.5;
           const rightSideRandom = "t";
           const binaryExpr = t.binaryExpression(
             "===",
@@ -168,11 +175,19 @@ export default class Parser {
             t.stringLiteral(shouldInvertBoolean ? generateUniqueLiteral(1, rightSideRandom) : rightSideRandom),
           );
 
-          path.replaceWith(t.blockStatement([t.ifStatement(
-            shouldInvertBoolean ? t.unaryExpression("!", binaryExpr, true) : binaryExpr,
-            path.node,
-            null,
-          )]));
+          path.replaceWith(
+            t.blockStatement(
+              [
+                t.ifStatement(
+                  shouldInvertBoolean ?
+                    t.unaryExpression("!", binaryExpr, true) :
+                    binaryExpr,
+                  path.node,
+                  null,
+                ),
+              ],
+            ),
+          );
         }
       },
     });
