@@ -36,8 +36,6 @@ beforeEach(() => {
     Object.keys(window).forEach(prop => {
         originalWindowProps.push(prop);
     });
-    
-    Object.freeze(originalWindowProps);
 
     compiler = new Compiler();
     programBuilder = new ProgramBuilder();
@@ -55,7 +53,7 @@ function safelyEndTesting(failedCode: string, failError: Error): void {
 
 export const executeCode = async (code: string): Promise<void> => {
     // Ensure all tests result deleted before
-    beforeEach(deleteTestResult);
+    deleteTestResult();
 
     compiler.compile(code);
 
@@ -72,7 +70,7 @@ export const executeCode = async (code: string): Promise<void> => {
 
 export const executeShouldThrownCode = async (code: string): Promise<unknown> => {
     // Ensure all tests result deleted before
-    beforeEach(deleteTestResult);
+    deleteTestResult();
 
     let thrownError: unknown;
 
