@@ -151,7 +151,7 @@ export const instructionSet = [
               $currentState = ${state_array_getter}(${state}),
               $callerFunc = ${state}.${caller};
             $currentState.${memory}[$id] = $callerFunc;
-            `)
+            `);
         },
     },
     {
@@ -209,15 +209,15 @@ export const instructionSet = [
             const state_storer = v.get("STATE_STORER");
             const current_this = v.get("CURRENT_THIS");
             const caller = v.get("CALLER");
-            const common_functions = v.get("COMMON_FUNCTIONS");
+            const state_related_functions = v.get("STATE_RELATED_FUNCTIONS");
             return new Template(`
             var $address = ${pop}(${state}), 
                 $length = ${pop}(${state}),
                 $funcName = ${pop}(${state}),
                 $parentState = ${state_array_getter}(${state}),
-                $stateFunction = ${common_functions}[2],
-                $dispatchHandler = ${common_functions}[3],
-                $randomProp = ${common_functions}[4],
+                $stateFunction = ${state_related_functions}[2],
+                $dispatchHandler = ${state_related_functions}[3],
+                $randomProp = ${state_related_functions}[4],
                 $targetFunc = function() {
                   var $funcState = $stateFunction();
                   $funcState.${state_arr}[${ARGUMENTS_REG}] = arguments;
@@ -265,12 +265,12 @@ export const instructionSet = [
             const state_storer = v.get("STATE_STORER");
             const current_this = v.get("CURRENT_THIS");
             const caller = v.get("CALLER");
-            const common_functions = v.get("COMMON_FUNCTIONS");
+            const state_related_functions = v.get("STATE_RELATED_FUNCTIONS");
             return new Template(`
             var $callArgs = ${pop}(${state}),
               $targetFunc = ${pop}(${state}),
               $thisContext = ${pop}(${state}),
-              $randomFuncProp = ${common_functions}[4];
+              $randomFuncProp = ${state_related_functions}[4];
             if ($targetFunc[$randomFuncProp] && $targetFunc[$randomFuncProp].${random_func_prop_func} === $targetFunc) {
               ${state}.${state_arr} = [$targetFunc[$randomFuncProp].${random_func_prop_addr}, {
                 ${current_this}: $thisContext,
@@ -639,9 +639,9 @@ export const instructionSet = [
             const push = v.get("PUSH");
             const state = v.get("STATE");
             const pop = v.get("POP");
-            const one_loc_use = v.get("ONE_LOC_USE");
+            const big_object_like_instances = v.get("BIG_OBJECT_LIKE_INSTANCES");
             return new Template(`
-            var $global = ${one_loc_use}[0];
+            var $global = ${big_object_like_instances}[0];
             ${push}(${state}, $global[${pop}(${state})]);
             `)
         },
@@ -684,10 +684,10 @@ export const instructionSet = [
             const state_array_getter = v.get("STATE_ARRAY_GETTER");
             const func_result_storer = v.get("FUNC_RESULT_STORER");
             const func_result_storer_value = v.get("FUNC_RESULT_STORER_VALUE");
-            const common_functions = v.get("COMMON_FUNCTIONS");
+            const state_related_functions = v.get("STATE_RELATED_FUNCTIONS");
             return new Template(`
-            var $bytecodeReturn = ${common_functions}[0]
-              , $exceptionHandler = ${common_functions}[1];
+            var $bytecodeReturn = ${state_related_functions}[0]
+              , $exceptionHandler = ${state_related_functions}[1];
             if (${state}.${error_object}) $exceptionHandler(${state}, ${state}.${error_object}.${error}); else {
               var $state = ${state_array_getter}(${state});
               return $state != null && $state.${func_result_storer} && $bytecodeReturn(${state}, $state.${func_result_storer}.${func_result_storer_value})
@@ -701,9 +701,9 @@ export const instructionSet = [
         templateFn: function (v: Map<string, string>): Template {
             const state = v.get("STATE");
             const pop = v.get("POP");
-            const common_functions = v.get("COMMON_FUNCTIONS");
+            const state_related_functions = v.get("STATE_RELATED_FUNCTIONS");
             return new Template(`
-            var $exceptionHandler = ${common_functions}[1]
+            var $exceptionHandler = ${state_related_functions}[1]
               , $error = ${pop}(${state});
             $exceptionHandler(${state}, $error)
             `)
@@ -752,9 +752,9 @@ export const instructionSet = [
         templateFn: function (v: Map<string, string>): Template {
             const state = v.get("STATE");
             const pop = v.get("POP");
-            const common_functions = v.get("COMMON_FUNCTIONS");
+            const state_related_functions = v.get("STATE_RELATED_FUNCTIONS");
             return new Template(`
-            var $bytecodeReturn = ${common_functions}[0],
+            var $bytecodeReturn = ${state_related_functions}[0],
                 $value = ${pop}(${state});
             return $bytecodeReturn(${state}, $value);
             `)
@@ -765,9 +765,9 @@ export const instructionSet = [
         requiredArgs: 7,
         templateFn: function (v: Map<string, string>): Template {
             const state = v.get("STATE");
-            const common_functions = v.get("COMMON_FUNCTIONS");
+            const state_related_functions = v.get("STATE_RELATED_FUNCTIONS");
             return new Template(`
-            var $bytecodeReturn = ${common_functions}[0];
+            var $bytecodeReturn = ${state_related_functions}[0];
             return $bytecodeReturn(${state}, void 0);
             `)
         },
@@ -793,9 +793,9 @@ export const instructionSet = [
         templateFn: function (v: Map<string, string>): Template {
             const state = v.get("STATE");
             const push = v.get("PUSH");
-            const one_loc_use = v.get("ONE_LOC_USE");
+            const big_object_like_instances = v.get("BIG_OBJECT_LIKE_INSTANCES");
             return new Template(`
-            var $asyncCommon = ${one_loc_use}[1];
+            var $asyncCommon = ${big_object_like_instances}[1];
             ${push}(${state}, $asyncCommon[0]);
             `)
         },
@@ -806,9 +806,9 @@ export const instructionSet = [
         templateFn: function (v: Map<string, string>): Template {
             const state = v.get("STATE");
             const push = v.get("PUSH");
-            const one_loc_use = v.get("ONE_LOC_USE");
+            const big_object_like_instances = v.get("BIG_OBJECT_LIKE_INSTANCES");
             return new Template(`
-            var $asyncCommon = ${one_loc_use}[1];
+            var $asyncCommon = ${big_object_like_instances}[1];
             ${push}(${state}, $asyncCommon[1]);
             `)
         },

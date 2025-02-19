@@ -3,7 +3,7 @@ import VariableGenerator from "./ProgramBuilderVariableGenerator";
 import generate from "@babel/generator";
 import * as t from '@babel/types';
 import { transformSync } from "@babel/core";
-import regeneratorRuntimeTemplate from "./Templates/Regenerator";
+import regeneratorRuntimeTemplate from "./Templates/RegeneratorRuntime";
 import { OperatorCode, FUNCTION_RESULT_REG, generateASTInstructionHandlers } from "../Instruction";
 import BytecodeTranscoderProvider, { shuffle } from "./Bytecode/BytecodeTranscoderProvider";
 import unraw from "unraw";
@@ -20,7 +20,7 @@ export default class ProgramBuilder {
     private compileDispatcherAST(env: Record<string, string>): Array<t.Statement> {
         return new Template(`
             function {dispatcherFunctionName}(state) {
-                for (var oneLocUseVariables = [
+                for (var bigObjectLikeInstances = [
                     {globalObjectName}, 
                     [
                         {promiseName}, 
@@ -28,7 +28,7 @@ export default class ProgramBuilder {
                     ], 
                     {decodedBytecodeName}
                 ], 
-                commonFunctions = [
+                stateRelatedFunctions = [
                     {bytecodeReturnFunctionName}, 
                     {exceptionHandlerFunctionName}, 
                     {vmStateFunctionName}, 
@@ -276,16 +276,16 @@ export default class ProgramBuilder {
         const popArgument = variableGenerator.generateIdentifier();
         const pushArgument = variableGenerator.generateIdentifier();
         const stateArrayGetterArgument = variableGenerator.generateIdentifier();
-        const oneLocUseArgument = variableGenerator.generateIdentifier();
-        const commonFunctionsArgument = variableGenerator.generateIdentifier();
+        const bigObjectLikeInstancesArgument = variableGenerator.generateIdentifier();
+        const stateRelatedFunctionsArgument = variableGenerator.generateIdentifier();
 
         const instructionAccesibleVariableNames: Map<string, string> = new Map<string, string>([
             ["STATE", stateArgument],
             ["POP", popArgument],
             ["PUSH", pushArgument],
             ["STATE_ARRAY_GETTER", stateArrayGetterArgument],
-            ["ONE_LOC_USE", oneLocUseArgument],
-            ["COMMON_FUNCTIONS", commonFunctionsArgument],
+            ["BIG_OBJECT_LIKE_INSTANCES", bigObjectLikeInstancesArgument],
+            ["STATE_RELATED_FUNCTIONS", stateRelatedFunctionsArgument],
 
             ["BYTECODE", defaultVariableEnvironment["decodedBytecodeName"]],
             ["STATE_ARR", defaultVariableEnvironment["stateArrPropName"]],
@@ -310,8 +310,8 @@ export default class ProgramBuilder {
             defaultVariableEnvironment["literalLoaderAliasFunctionName"],
             defaultVariableEnvironment["pushFunctionName"],
             defaultVariableEnvironment["stateIndex1GetterFunctionName"],
-            "oneLocUseVariables",
-            "commonFunctions",
+            "bigObjectLikeInstances",
+            "stateRelatedFunctions",
         ];
 
         const handlers = generateASTInstructionHandlers(
@@ -321,8 +321,8 @@ export default class ProgramBuilder {
                 t.identifier(popArgument),
                 t.identifier(pushArgument),
                 t.identifier(stateArrayGetterArgument),
-                t.identifier(oneLocUseArgument),
-                t.identifier(commonFunctionsArgument),
+                t.identifier(bigObjectLikeInstancesArgument),
+                t.identifier(stateRelatedFunctionsArgument),
             ] satisfies Array<t.Identifier>,
         );
 
@@ -333,7 +333,7 @@ export default class ProgramBuilder {
                     t.variableDeclarator(
                         t.identifier(defaultVariableEnvironment["instructionSetName"]),
                         t.arrayExpression(handlers),
-                    )
+                    ),
                 ],
             ),
         );
