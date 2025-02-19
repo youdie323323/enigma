@@ -27,7 +27,7 @@ JavaScript enigma VM obfuscates your code by compiling it into a custom bytecode
 
 Unlike traditional obfuscators like obfuscator.io or js-confuser, Enigma analyzes the AST (Abstract Syntax Tree) and converts everything into bytecode before running it on a VM. To reverse this, one would need to create a disassembler, which is no trivial task. 
 
-Moreover, deobfuscating the original code from the disassembled output is extremely challenging. Most disassemblers display the code in an assembly-like format. This means that if the code is pre-obfuscated and then executed on the Enigma VM, the difficulty of reverse engineering increases significantly.
+Moreover, deobfuscating the original code from the disassembled output is extremely challenging. Most disassemblers display the code in an assembly-like format. This means that if the code is pre-obfuscated and then compiled/executed on the Enigma VM, the difficulty of reverse engineering increases significantly.
 
 ## 🚀 Quick Start
 
