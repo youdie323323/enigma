@@ -1,5 +1,5 @@
-[![npm](https://img.shields.io/npm/v/js-enigma-vm)](https://www.npmjs.com/package/js-enigma-vm)
-[![license](https://img.shields.io/github/license/youdie323323/js-enigma-vm)](https://github.com/youdie323323/js-enigma-vm/blob/master/LICENSE)
+[![npm](https://img.shields.io/npm/v/enigma)](https://www.npmjs.com/package/enigma)
+[![license](https://img.shields.io/github/license/youdie323323/enigma)](https://github.com/youdie323323/enigma/blob/master/LICENSE)
 
 <h1 align="center">enigma</h1>
 
@@ -27,13 +27,13 @@ JavaScript Enigma VM obfuscates your code by compiling it into a custom bytecode
 ### Installation
 
 ```bash
-npm install js-enigma-vm
+npm install enigma
 ```
 
 ### Usage Example
 
 ```ts
-import { Compiler, ProgramBuilder } from "js-enigma-vm";
+import { Compiler, ProgramBuilder } from "enigma";
 
 (async function () {
   const compiler = new Compiler();
@@ -67,7 +67,7 @@ This Enigma Virtual Machine is a recreation of [KASADA's virtual machine](https:
 
 ## 🐞 Found a Bug?
 
-If you encounter any issues, please [open an issue](https://github.com/youdie323323/js-enigma-vm/issues/new?template=bug_report.yml)!
+If you encounter any issues, please [open an issue](https://github.com/youdie323323/enigma/issues/new?template=bug_report.yml)!
 
 ## 🙌 Credits
 

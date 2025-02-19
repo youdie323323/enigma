@@ -1,5 +1,5 @@
 {
-    "name": "js-enigma-vm",
+    "name": "enigma",
     "version": "1.0.0",
     "private": false,
     "description": "The first published repository of javascript virtual machine obfuscator",
@@ -15,13 +15,13 @@
         "kasada",
         "jsvmp"
     ],
-    "homepage": "https://github.com/youdie323323/js-enigma-vm#readme",
+    "homepage": "https://github.com/youdie323323/enigma#readme",
     "bugs": {
-        "url": "https://github.com/youdie323323/js-enigma-vm/issues"
+        "url": "https://github.com/youdie323323/enigma/issues"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/youdie323323/js-enigma-vm.git"
+        "url": "git+https://github.com/youdie323323/enigma.git"
     },
     "license": "MIT",
     "author": "youdi3",
