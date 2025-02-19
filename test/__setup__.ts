@@ -6,7 +6,7 @@ export let window: any;
 export let compiler: Compiler;
 export let programBuilder: ProgramBuilder;
 
-beforeEach(() => {
+beforeAll(() => {
     // Setup global envroiments
     const document = {
         documentElement: {},
