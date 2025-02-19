@@ -74,7 +74,7 @@ This enigma virtual machine is a recreation of [KASADA's virtual machine](https:
 
 ## 🐞 Found a Bug?
 
-If you encounter any issues, please [open an issue](https://github.com/youdie323323/enigma/issues/new?template=bug_report.yml)!
+If you encounter any issues, please [open an issue](https://github.com/youdie323323/enigma/issues/new?template=bug_report.yml)! Don't submit any PRs until issue approved.
 
 ## 🙌 Credits
 
