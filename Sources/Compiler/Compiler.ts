@@ -829,7 +829,7 @@ export default class Compiler {
             const reg = this.registerAllocator.next();
 
             if (this.scopedMemory.has(expr.name) === false) {
-              // V8 throws error when unknown variable does not exists on global
+              // TODO: V8 throws error when unknown variable does not exists on global
               this.writeInstructions(this.createOp(OperatorCode.GetWindowProp), ...this.createLiteral(expr.name), this.createRegId(reg));
             } else {
               this.writeInstructions(this.createOp(OperatorCode.Load), ...this.compileMemory(expr.name), this.createRegId(reg));
