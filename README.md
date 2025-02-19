@@ -21,7 +21,7 @@ In a nutshell, i called this as **javascript version of webassembly**.
 
 ## 📌 How It Works
 
-JavaScript Enigma VM obfuscates your code by compiling it into a custom bytecode format that runs on an embedded virtual machine.
+JavaScript enigma VM obfuscates your code by compiling it into a custom bytecode format that runs on an embedded virtual machine.
 
 ## 🚀 Quick Start
 
@@ -64,7 +64,7 @@ Check out the `examples` folder for sample compiled code!
 
 ## 🎭 Interpreter
 
-This Enigma Virtual Machine is a recreation of [KASADA's virtual machine](https://accounts.nike.com/149e9513-01fa-4fb0-aad4-566afd725d1b/2d206a39-8ed7-437e-a3be-862e0f06eea3/ips.js).
+This enigma virtual machine is a recreation of [KASADA's virtual machine](https://accounts.nike.com/149e9513-01fa-4fb0-aad4-566afd725d1b/2d206a39-8ed7-437e-a3be-862e0f06eea3/ips.js).
 
 ## 🐞 Found a Bug?
 
