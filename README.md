@@ -1,7 +1,7 @@
 [![npm](https://img.shields.io/npm/v/enigma)](https://www.npmjs.com/package/enigma)
 [![license](https://img.shields.io/github/license/youdie323323/enigma)](https://github.com/youdie323323/enigma/blob/master/LICENSE)
 
-<h1 align="center">enigma</h1>
+<h1 align="center">Ёnigma</h1>
 
 🚀 **The first publicly available better javascript virtual machine obfuscator**
 
