@@ -79,9 +79,9 @@ export const instructionSet = [
             const state = v.get("STATE");
             const pop = v.get("POP");
             const memory = v.get("MEMORY");
-            const state_array_getter = v.get("STATE_ARRAY_GETTER");
+            const state_index1_getter = v.get("STATE_INDEX1_GETTER");
             return new Template(`
-            ${state_array_getter}(${state}).${memory}[${pop}(${state})] = void 0
+            ${state_index1_getter}(${state}).${memory}[${pop}(${state})] = void 0
             `)
         },
     },
@@ -92,9 +92,9 @@ export const instructionSet = [
             const state = v.get("STATE");
             const pop = v.get("POP");
             const memory = v.get("MEMORY");
-            const state_array_getter = v.get("STATE_ARRAY_GETTER");
+            const state_index1_getter = v.get("STATE_INDEX1_GETTER");
             return new Template(`
-            ${state_array_getter}(${state}).${memory}[${pop}(${state})] = ${pop}(${state})
+            ${state_index1_getter}(${state}).${memory}[${pop}(${state})] = ${pop}(${state})
             `)
         },
     },
@@ -107,9 +107,9 @@ export const instructionSet = [
             const push = v.get("PUSH");
             const parent_memory_keeper = v.get("PARENT_MEMORY_KEEPER");
             const memory = v.get("MEMORY");
-            const state_array_getter = v.get("STATE_ARRAY_GETTER");
+            const state_index1_getter = v.get("STATE_INDEX1_GETTER");
             return new Template(`
-            for (var $varName = ${pop}(${state}), $currentState = ${state_array_getter}(${state}); $currentState; $currentState = $currentState.${parent_memory_keeper}) 
+            for (var $varName = ${pop}(${state}), $currentState = ${state_index1_getter}(${state}); $currentState; $currentState = $currentState.${parent_memory_keeper}) 
               if ($varName in $currentState.${memory}) {
                 ${push}(${state}, $currentState.${memory}[$varName])
                 return;
@@ -126,9 +126,9 @@ export const instructionSet = [
             const pop = v.get("POP");
             const parent_memory_keeper = v.get("PARENT_MEMORY_KEEPER");
             const memory = v.get("MEMORY");
-            const state_array_getter = v.get("STATE_ARRAY_GETTER");
+            const state_index1_getter = v.get("STATE_INDEX1_GETTER");
             return new Template(`
-            for (var $varName = ${pop}(${state}), $value = ${pop}(${state}), $currentState = ${state_array_getter}(${state}); $currentState; $currentState = $currentState.${parent_memory_keeper}) 
+            for (var $varName = ${pop}(${state}), $value = ${pop}(${state}), $currentState = ${state_index1_getter}(${state}); $currentState; $currentState = $currentState.${parent_memory_keeper}) 
               if ($varName in $currentState.${memory}) {
                 $currentState.${memory}[$varName] = $value
                 return;
@@ -144,11 +144,11 @@ export const instructionSet = [
             const state = v.get("STATE");
             const pop = v.get("POP");
             const memory = v.get("MEMORY");
-            const state_array_getter = v.get("STATE_ARRAY_GETTER");
+            const state_index1_getter = v.get("STATE_INDEX1_GETTER");
             const caller = v.get("CALLER");
             return new Template(`
             var $id = ${pop}(${state}),
-              $currentState = ${state_array_getter}(${state}),
+              $currentState = ${state_index1_getter}(${state}),
               $callerFunc = ${state}.${caller};
             $currentState.${memory}[$id] = $callerFunc;
             `);
@@ -205,7 +205,7 @@ export const instructionSet = [
             const random_func_prop_parent = v.get("RAND_FUNC_PROP_PARENT");
             const parent_memory_keeper = v.get("PARENT_MEMORY_KEEPER");
             const memory = v.get("MEMORY");
-            const state_array_getter = v.get("STATE_ARRAY_GETTER");
+            const state_index1_getter = v.get("STATE_INDEX1_GETTER");
             const state_storer = v.get("STATE_STORER");
             const current_this = v.get("CURRENT_THIS");
             const caller = v.get("CALLER");
@@ -214,7 +214,7 @@ export const instructionSet = [
             var $address = ${pop}(${state}), 
                 $length = ${pop}(${state}),
                 $funcName = ${pop}(${state}),
-                $parentState = ${state_array_getter}(${state}),
+                $parentState = ${state_index1_getter}(${state}),
                 $stateFunction = ${state_related_functions}[2],
                 $dispatchHandler = ${state_related_functions}[3],
                 $randomProp = ${state_related_functions}[4],
@@ -681,7 +681,7 @@ export const instructionSet = [
             const state = v.get("STATE");
             const error_object = v.get("ERROR_OBJECT");
             const error = v.get("ERROR_OBJECT_VALUE");
-            const state_array_getter = v.get("STATE_ARRAY_GETTER");
+            const state_index1_getter = v.get("STATE_INDEX1_GETTER");
             const func_result_storer = v.get("FUNC_RESULT_STORER");
             const func_result_storer_value = v.get("FUNC_RESULT_STORER_VALUE");
             const state_related_functions = v.get("STATE_RELATED_FUNCTIONS");
@@ -689,7 +689,7 @@ export const instructionSet = [
             var $bytecodeReturn = ${state_related_functions}[0]
               , $exceptionHandler = ${state_related_functions}[1];
             if (${state}.${error_object}) $exceptionHandler(${state}, ${state}.${error_object}.${error}); else {
-              var $state = ${state_array_getter}(${state});
+              var $state = ${state_index1_getter}(${state});
               return $state != null && $state.${func_result_storer} && $bytecodeReturn(${state}, $state.${func_result_storer}.${func_result_storer_value})
             }
             `)

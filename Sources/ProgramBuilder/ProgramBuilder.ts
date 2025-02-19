@@ -275,15 +275,24 @@ export default class ProgramBuilder {
         const stateArgument = variableGenerator.generateIdentifier();
         const popArgument = variableGenerator.generateIdentifier();
         const pushArgument = variableGenerator.generateIdentifier();
-        const stateArrayGetterArgument = variableGenerator.generateIdentifier();
+        const stateIndex1GetterArgument = variableGenerator.generateIdentifier();
         const bigObjectLikeInstancesArgument = variableGenerator.generateIdentifier();
         const stateRelatedFunctionsArgument = variableGenerator.generateIdentifier();
+
+        const callerArguments = [
+            "state",                                                      // stateArgument
+            defaultVariableEnvironment["literalLoaderAliasFunctionName"], // popArgument
+            defaultVariableEnvironment["pushFunctionName"],               // pushArgument
+            defaultVariableEnvironment["stateIndex1GetterFunctionName"],  // stateIndex1GetterArgument
+            "bigObjectLikeInstances",                                     // bigObjectLikeInstancesArgument
+            "stateRelatedFunctions",                                      // stateRelatedFunctionsArgument
+        ];
 
         const instructionAccesibleVariableNames: Map<string, string> = new Map<string, string>([
             ["STATE", stateArgument],
             ["POP", popArgument],
             ["PUSH", pushArgument],
-            ["STATE_ARRAY_GETTER", stateArrayGetterArgument],
+            ["STATE_INDEX1_GETTER", stateIndex1GetterArgument],
             ["BIG_OBJECT_LIKE_INSTANCES", bigObjectLikeInstancesArgument],
             ["STATE_RELATED_FUNCTIONS", stateRelatedFunctionsArgument],
 
@@ -305,22 +314,13 @@ export default class ProgramBuilder {
             ["ERROR_OBJECT_VALUE", defaultVariableEnvironment["objectSubpropName"]],
         ]);
 
-        const callerArguments = [
-            "state",
-            defaultVariableEnvironment["literalLoaderAliasFunctionName"],
-            defaultVariableEnvironment["pushFunctionName"],
-            defaultVariableEnvironment["stateIndex1GetterFunctionName"],
-            "bigObjectLikeInstances",
-            "stateRelatedFunctions",
-        ];
-
         const handlers = generateASTInstructionHandlers(
             instructionAccesibleVariableNames,
             [
                 t.identifier(stateArgument),
                 t.identifier(popArgument),
                 t.identifier(pushArgument),
-                t.identifier(stateArrayGetterArgument),
+                t.identifier(stateIndex1GetterArgument),
                 t.identifier(bigObjectLikeInstancesArgument),
                 t.identifier(stateRelatedFunctionsArgument),
             ] satisfies Array<t.Identifier>,
