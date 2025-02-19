@@ -6,6 +6,8 @@ export let window: any;
 export let compiler: Compiler;
 export let programBuilder: ProgramBuilder;
 
+const originalWindowProps: Set<string> = new Set();
+
 beforeAll(() => {
     // Setup global envroiments
     const document = {
@@ -34,7 +36,7 @@ beforeAll(() => {
     }
 
     Object.keys(window).forEach(prop => {
-        originalWindowProps.push(prop);
+        originalWindowProps.add(prop);
     });
 
     compiler = new Compiler();
@@ -89,13 +91,11 @@ export const executeShouldThrownCode = async (code: string): Promise<unknown> =>
     return thrownError;
 };
 
-const originalWindowProps: string[] = [];
-
 export const deleteTestResult = (): void => {
     const currentProps = Object.keys(window);
 
     currentProps.forEach(prop => {
-        if (!originalWindowProps.includes(prop)) {
+        if (!originalWindowProps.has(prop)) {
             delete window[prop];
         }
     });
