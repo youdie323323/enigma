@@ -1,5 +1,5 @@
 {
-    "name": "enigma",
+    "name": "enigma-vm",
     "version": "1.0.1",
     "private": false,
     "description": "The first published repository of javascript virtual machine obfuscator",

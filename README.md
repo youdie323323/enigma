@@ -27,13 +27,13 @@ JavaScript Enigma VM obfuscates your code by compiling it into a custom bytecode
 ### Installation
 
 ```bash
-npm install enigma
+npm install enigma-vm
 ```
 
 ### Usage Example
 
 ```ts
-import { Compiler, ProgramBuilder } from "enigma";
+import { Compiler, ProgramBuilder } from "enigma-vm";
 
 (async function () {
   const compiler = new Compiler();
