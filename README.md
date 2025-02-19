@@ -21,7 +21,7 @@ In a nutshell, i called this as **javascript version of webassembly**.
 
 ## 📌 How It Works
 
-JavaScript enigma VM obfuscates your code by compiling it into a custom bytecode format that runs on an embedded virtual machine.
+Enigma VM obfuscates your javascript code by compiling it into a custom bytecode format that runs on an embedded javascript virtual machine.
 
 ### ❓ Why Enigma?
 
@@ -46,14 +46,14 @@ import { Compiler, ProgramBuilder } from "enigma-vm";
   const compiler = new Compiler();
 
   const input = `
-        function sayHello(name) {
-            console.log("Hello,", name + "!");
-        }
+    function sayHello(name) {
+        console.log("Hello,", name + "!");
+    }
 
-        for (let i = 0; i < 3; i++) {
-            sayHello("Me and " + i);
-        }
-    `;
+    for (let i = 0; i < 3; i++) {
+        sayHello("Me and " + i);
+    }
+  `;
 
   compiler.compile(input);
 
