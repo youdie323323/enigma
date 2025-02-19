@@ -33,6 +33,12 @@ beforeEach(() => {
         global[key] = window[key];
     }
 
+    Object.keys(window).forEach(prop => {
+        originalWindowProps.push(prop);
+    });
+    
+    Object.freeze(originalWindowProps);
+
     compiler = new Compiler();
     programBuilder = new ProgramBuilder();
 });
@@ -41,13 +47,16 @@ function safelyEndTesting(failedCode: string, failError: Error): void {
     writeFileSync("dev.output.js", failedCode, {
         encoding: "utf-8",
     });
-    
+
     throw failError;
 
     expect(true).toStrictEqual(false);
 }
 
 export const executeCode = async (code: string): Promise<void> => {
+    // Ensure all tests result deleted before
+    beforeEach(deleteTestResult);
+
     compiler.compile(code);
 
     const bytecode = compiler.constructBytecode();
@@ -62,6 +71,9 @@ export const executeCode = async (code: string): Promise<void> => {
 };
 
 export const executeShouldThrownCode = async (code: string): Promise<unknown> => {
+    // Ensure all tests result deleted before
+    beforeEach(deleteTestResult);
+
     let thrownError: unknown;
 
     compiler.compile(code);
@@ -77,4 +89,16 @@ export const executeShouldThrownCode = async (code: string): Promise<unknown> =>
     }
 
     return thrownError;
+};
+
+const originalWindowProps: string[] = [];
+
+export const deleteTestResult = (): void => {
+    const currentProps = Object.keys(window);
+
+    currentProps.forEach(prop => {
+        if (!originalWindowProps.includes(prop)) {
+            delete window[prop];
+        }
+    });
 };
