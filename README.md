@@ -31,12 +31,16 @@ Moreover, deobfuscating the original code from the disassembled output is **extr
 
 That being said, overconfidence is not advisable. Please use it in moderation. There is no such thing as obfuscation that makes reverse engineering impossible. **Do not include personal information or passwords in code** that gets compiled.
 
+## 🔍 Example
+
+Check out the `examples` folder for sample compiled code!
+
 ## 🚀 Quick Start
 
 ### Installation
 
 ```bash
-npm install enigma-vm
+$ npm install enigma-vm
 ```
 
 ### Usage Example
@@ -65,10 +69,6 @@ import { Compiler, ProgramBuilder } from "enigma-vm";
   console.log(code);
 })();
 ```
-
-## 🔍 Example
-
-Check out the `examples` folder for sample compiled code!
 
 ## 🎭 Interpreter
 
