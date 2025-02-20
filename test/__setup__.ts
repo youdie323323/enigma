@@ -32,7 +32,7 @@ beforeAll(() => {
         Atomics, DataView, Intl, WebAssembly, Function, BigInt,
         Reflect, Proxy, $: false,
     };
-    
+
     window.window = window;
     global.window = window;
     for (var key in window) {
@@ -97,7 +97,7 @@ export const executeShouldThrownCode = async (code: string): Promise<unknown> =>
 
     try {
         eval(compiledCode);
-        safelyEndTesting(compiledCode, new Error("The code must throw error, but its not throwing error"));
+        safelyEndTesting(compiledCode, new Error("The code must throw error, but its not"));
     } catch (e) {
         thrownError = e;
     }
