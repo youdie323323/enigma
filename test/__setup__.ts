@@ -8,12 +8,16 @@ export let programBuilder: ProgramBuilder;
 
 const originalWindowProps: Set<string> = new Set();
 
+type DeepPartial<T> = {
+    [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K]
+};
+
 beforeAll(() => {
     // Setup global envroiments
     const document = {
         documentElement: {},
         createElement: () => ({ style: {} }),
-    } as any as Document;
+    } satisfies DeepPartial<Document>;
 
     window = {
         document,
@@ -27,8 +31,8 @@ beforeAll(() => {
         Map, Set, WeakMap, WeakSet, ArrayBuffer, SharedArrayBuffer,
         Atomics, DataView, Intl, WebAssembly, Function, BigInt,
         Reflect, Proxy, $: false,
-    } as any;
-
+    };
+    
     window.window = window;
     global.window = window;
     for (var key in window) {
@@ -52,6 +56,16 @@ function safelyEndTesting(failedCode: string, failError: Error): void {
 
     expect(true).toStrictEqual(false);
 }
+
+export const deleteTestResult = (): void => {
+    const currentProps = Object.keys(window);
+
+    currentProps.forEach(prop => {
+        if (!originalWindowProps.has(prop)) {
+            delete window[prop];
+        }
+    });
+};
 
 export const executeCode = async (code: string): Promise<void> => {
     // Ensure all tests result deleted before
@@ -89,14 +103,4 @@ export const executeShouldThrownCode = async (code: string): Promise<unknown> =>
     }
 
     return thrownError;
-};
-
-export const deleteTestResult = (): void => {
-    const currentProps = Object.keys(window);
-
-    currentProps.forEach(prop => {
-        if (!originalWindowProps.has(prop)) {
-            delete window[prop];
-        }
-    });
 };

@@ -268,15 +268,15 @@ export default class Compiler {
   /**
    * Compiles variable assignment.
    * 
-   * @param reg - The register number to store expression value
-   * @param valueFn - Compiles right-side value then return value register
    * @param isOperatorEqual - The operator is assignment ("=") or not
+   * @param reg - The register number to copy expression value
+   * @param valueFn - Compiles right-side value then return value register
    */
   private compileAssign(
     { name }: t.Identifier,
+    isOperatorEqual: boolean,
     reg: Register,
     valueFn: () => Register,
-    isOperatorEqual: boolean,
   ) {
     if (
       (isOperatorEqual && !this.scopedMemory.has(name)) ||
@@ -1158,11 +1158,11 @@ export default class Compiler {
 
         if (t.isIdentifier(left)) {
           if (operator === "=") {
-            this.compileAssign(left, assignReg, () => {
+            this.compileAssign(left, true, assignReg, () => {
               return this.compileExpression(right);
-            }, true);
+            });
           } else {
-            this.compileAssign(left, assignReg, () => {
+            this.compileAssign(left, false, assignReg, () => {
               const leftReg = this.compileExpression(left);
               const rightReg = this.compileExpression(right);
               // Reuse leftReg
@@ -1174,7 +1174,7 @@ export default class Compiler {
               this.registerAllocator.free();
 
               return valueReg;
-            }, false);
+            });
           }
         } else if (t.isMemberExpression(left)) {
           const objectReg = this.compileExpression(left.object);
