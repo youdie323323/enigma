@@ -43,11 +43,8 @@ export function memo<A extends unknown[], R extends unknown, T extends unknown, 
     };
 }
 
-export function Memoize<A extends unknown[], R extends unknown, T extends unknown>(options: MemoizeOptions<A, R> = {}) {
-    return function (value: MemoizableFunction<A, R, T>, context: ClassMethodDecoratorContext) {
-        const memoizedFn = memo(value, options);
-        return function (this: T, ...args: A): R {
-            return memoizedFn.apply(this, args);
-        };
+export function Memoize<A extends unknown[], R extends unknown, T extends unknown, H extends unknown>(options: MemoizeOptions<A, R, H> = {}) {
+    return function (fn: MemoizableFunction<A, R, T>, _context: ClassMethodDecoratorContext) {
+        return memo<A, R, T, H>(fn, options);
     };
 }

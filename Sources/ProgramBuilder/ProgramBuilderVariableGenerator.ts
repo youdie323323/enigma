@@ -84,7 +84,7 @@ export default class VariableGenerator {
     constructor(private varCount: number = 0) { }
 
     /**
-     * Reset variable count to zero.
+     * Reset variable count.
      */
     public reset(): void {
         this.varCount = 0;
