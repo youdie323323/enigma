@@ -8,17 +8,6 @@
 This tool allows you to run JavaScript code on a custom-built JavaScript interpreter, effectively making reverse engineering harder.  
 In a nutshell, i called this as **javascript version of webassembly**.
 
-## 🎯 Features
-
-🔒 **Obfuscation that truly hides your code**
-- Eliminates variable names
-- Hides structural differences in loops
-- Obscures labels
-- And much more...
-
-🛡️ **Virtually irreversible**
-- The compiled output is extremely difficult to restore to its original form.
-
 ## 📌 How It Works
 
 Enigma VM obfuscates your javascript code by compiling it into a custom bytecode format that runs on an embedded javascript virtual machine.
@@ -29,7 +18,13 @@ Unlike traditional obfuscators like [obfuscator.io](https://obfuscator.io/) or [
 
 Moreover, deobfuscating the original code from the disassembled output is **extremely** challenging. Most disassemblers display the code in an assembly-like format. This means that if the code is pre-obfuscated and then compiled/executed on the Enigma VM, the difficulty of reverse engineering increases significantly. 
 
-That being said, overconfidence is not advisable. Please use it in moderation. There is no such thing as obfuscation that makes reverse engineering impossible. **Do not include personal information or passwords in code** that gets compiled.
+🔒 **AST informations that completely removed on compilation phase**
+- Eliminates variable names
+- Hides structural differences in loops
+- Obscures labels
+- And much more...
+
+That being said, overconfidence is not advisable. Please use it in moderation. There is no such thing as obfuscation that makes reverse engineering impossible. **Do not include personal information or passwords in code** that gets compiled. 
 
 ## 🔍 Example
 
