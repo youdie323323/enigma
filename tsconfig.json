@@ -6,7 +6,10 @@
     "strict": true,
     "esModuleInterop": true,
     "moduleResolution": "node16",
+    "outDir": "./Dist",
+    "skipLibCheck": true,
     "noImplicitAny": false,
     "strictNullChecks": false
-  }
+  },
+  "include": ["Sources/**/*"]
 }
