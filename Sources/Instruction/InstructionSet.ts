@@ -1,13 +1,15 @@
-import Template from "../ProgramBuilder/Templates/Template";
+
 import {
-    default as Instruction,
+    OperatorCode,
     ARGUMENTS_REG,
     ARGUMENTS_SPREAD_REG,
     FUNCTION_RESULT_REG,
-    type NumOpCodes,
-    OperatorCode,
-} from "./";
+    type NumOpCodes
+} from "../Compiler/CompilerOperatorCode";
+import Template from "../Interpreter/Builder/Templates/Template";
+import Instruction from "./";
 import * as t from '@babel/types';
+import { InstructionAccesibleVariableEnvironment } from "./InstructionAccesibleVariableEnvironment";
 
 /**
  * Define instruction for each opcodes.
@@ -16,102 +18,124 @@ export const instructionSet = [
     {
         opcode: OperatorCode.Void,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const push = v.get("PUSH");
-            const state = v.get("STATE");
-            return new Template(`${push}(${state}, void 0)`)
+        templateFn: function ({
+            stateArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
+            return new Template(`
+            ${pushArgument}(${stateArgument}, void 0);
+            `)
         },
     },
     {
         opcode: OperatorCode.EmptyObject,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const push = v.get("PUSH");
-            const state = v.get("STATE");
-            return new Template(`${push}(${state}, {})`)
+        templateFn: function ({
+            stateArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
+            return new Template(`
+            ${pushArgument}(${stateArgument}, {});
+            `)
         },
     },
     {
         opcode: OperatorCode.EmptyArray,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const push = v.get("PUSH");
-            const state = v.get("STATE");
-            return new Template(`${push}(${state}, [])`)
+        templateFn: function ({
+            stateArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
+            return new Template(`
+            ${pushArgument}(${stateArgument}, []);
+            `)
         },
     },
     {
         opcode: OperatorCode.NewArray,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const push = v.get("PUSH");
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            return new Template(`${push}(${state}, new Array(${pop}(${state})))`)
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
+            return new Template(`
+            ${pushArgument}(${stateArgument}, new Array(${popArgument}(${stateArgument})));
+            `)
         },
     },
     {
         opcode: OperatorCode.SetReg,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const push = v.get("PUSH");
-            const state = v.get("STATE");
-            const pop = v.get("POP");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.NewRegExp,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const push = v.get("PUSH");
-            const state = v.get("STATE");
-            const pop = v.get("POP");
-            return new Template(`${push}(${state}, new RegExp(${pop}(${state}), ${pop}(${state})))`)
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
+            return new Template(`
+            ${pushArgument}(${stateArgument}, new RegExp(${popArgument}(${stateArgument}), ${popArgument}(${stateArgument})));
+            `)
         },
     },
     {
         opcode: OperatorCode.SetVoid,
         requiredArgs: 4,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const pop = v.get("POP");
-            const memory = v.get("MEMORY");
-            const state_index1_getter = v.get("STATE_INDEX1_GETTER");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            stateIndex1GetterArgument,
+            
+            memoryProp,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${state_index1_getter}(${state}).${memory}[${pop}(${state})] = void 0
+            ${stateIndex1GetterArgument}(${stateArgument}).${memoryProp}[${popArgument}(${stateArgument})] = void 0
             `)
         },
     },
     {
         opcode: OperatorCode.SetValue,
         requiredArgs: 4,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const pop = v.get("POP");
-            const memory = v.get("MEMORY");
-            const state_index1_getter = v.get("STATE_INDEX1_GETTER");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            stateIndex1GetterArgument,
+            
+            memoryProp,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${state_index1_getter}(${state}).${memory}[${pop}(${state})] = ${pop}(${state})
+            ${stateIndex1GetterArgument}(${stateArgument}).${memoryProp}[${popArgument}(${stateArgument})] = ${popArgument}(${stateArgument})
             `)
         },
     },
     {
         opcode: OperatorCode.Load,
         requiredArgs: 4,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const pop = v.get("POP");
-            const push = v.get("PUSH");
-            const parent_memory_keeper = v.get("PARENT_MEMORY_KEEPER");
-            const memory = v.get("MEMORY");
-            const state_index1_getter = v.get("STATE_INDEX1_GETTER");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+            stateIndex1GetterArgument,
+            
+            memoryProp,
+            parentMemoryStorerProp,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            for (var $varName = ${pop}(${state}), $currentState = ${state_index1_getter}(${state}); $currentState; $currentState = $currentState.${parent_memory_keeper}) 
-              if ($varName in $currentState.${memory}) {
-                ${push}(${state}, $currentState.${memory}[$varName])
+            for (var $varName = ${popArgument}(${stateArgument}), $currentState = ${stateIndex1GetterArgument}(${stateArgument}); $currentState; $currentState = $currentState.${parentMemoryStorerProp}) 
+              if ($varName in $currentState.${memoryProp}) {
+                ${pushArgument}(${stateArgument}, $currentState.${memoryProp}[$varName])
                 return;
               } 
             throw 'ball';
@@ -121,16 +145,18 @@ export const instructionSet = [
     {
         opcode: OperatorCode.Out,
         requiredArgs: 4,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const pop = v.get("POP");
-            const parent_memory_keeper = v.get("PARENT_MEMORY_KEEPER");
-            const memory = v.get("MEMORY");
-            const state_index1_getter = v.get("STATE_INDEX1_GETTER");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            stateIndex1GetterArgument,
+            
+            memoryProp,
+            parentMemoryStorerProp,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            for (var $varName = ${pop}(${state}), $value = ${pop}(${state}), $currentState = ${state_index1_getter}(${state}); $currentState; $currentState = $currentState.${parent_memory_keeper}) 
-              if ($varName in $currentState.${memory}) {
-                $currentState.${memory}[$varName] = $value
+            for (var $varName = ${popArgument}(${stateArgument}), $value = ${popArgument}(${stateArgument}), $currentState = ${stateIndex1GetterArgument}(${stateArgument}); $currentState; $currentState = $currentState.${parentMemoryStorerProp}) 
+              if ($varName in $currentState.${memoryProp}) {
+                $currentState.${memoryProp}[$varName] = $value
                 return;
               } 
             throw 'ball';
@@ -140,95 +166,103 @@ export const instructionSet = [
     {
         opcode: OperatorCode.InheritCaller,
         requiredArgs: 4,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const pop = v.get("POP");
-            const memory = v.get("MEMORY");
-            const state_index1_getter = v.get("STATE_INDEX1_GETTER");
-            const caller = v.get("CALLER");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            stateIndex1GetterArgument,
+            
+            memoryProp,
+            callerProp,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $id = ${pop}(${state}),
-              $currentState = ${state_index1_getter}(${state}),
-              $callerFunc = ${state}.${caller};
-            $currentState.${memory}[$id] = $callerFunc;
+            var $id = ${popArgument}(${stateArgument}),
+              $currentState = ${stateIndex1GetterArgument}(${stateArgument}),
+              $callerFunc = ${stateArgument}.${callerProp};
+            $currentState.${memoryProp}[$id] = $callerFunc;
             `);
         },
     },
     {
         opcode: OperatorCode.Jump,
         requiredArgs: 2,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const state_arr = v.get("STATE_ARR");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            
+            stateArrProp,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${state}.${state_arr}[0] = ${pop}(${state})
+            ${stateArgument}.${stateArrProp}[0] = ${popArgument}(${stateArgument})
             `)
         },
     },
     {
         opcode: OperatorCode.JumpIfTrue,
         requiredArgs: 2,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const state_arr = v.get("STATE_ARR");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            
+            stateArrProp,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $address = ${pop}(${state});
-            ${pop}(${state}) ? ${state}.${state_arr}[0] = $address : $address
+            var $address = ${popArgument}(${stateArgument});
+            ${popArgument}(${stateArgument}) ? ${stateArgument}.${stateArrProp}[0] = $address : $address
             `)
         },
     },
     {
         opcode: OperatorCode.JumpIfFalse,
         requiredArgs: 2,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const state_arr = v.get("STATE_ARR");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            
+            stateArrProp,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $address = ${pop}(${state});
-            ${pop}(${state}) ? $address : ${state}.${state_arr}[0] = $address
+            var $address = ${popArgument}(${stateArgument});
+            ${popArgument}(${stateArgument}) ? $address : ${stateArgument}.${stateArrProp}[0] = $address
             `)
         },
     },
     {
         opcode: OperatorCode.Func,
         requiredArgs: 7,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const push = v.get("PUSH");
-            const state = v.get("STATE");
-            const state_arr = v.get("STATE_ARR");
-            const random_func_prop_addr = v.get("RAND_FUNC_PROP_ADDR");
-            const random_func_prop_func = v.get("RAND_FUNC_PROP_FUNC");
-            const random_func_prop_parent = v.get("RAND_FUNC_PROP_PARENT");
-            const parent_memory_keeper = v.get("PARENT_MEMORY_KEEPER");
-            const memory = v.get("MEMORY");
-            const state_index1_getter = v.get("STATE_INDEX1_GETTER");
-            const state_storer = v.get("STATE_STORER");
-            const current_this = v.get("CURRENT_THIS");
-            const caller = v.get("CALLER");
-            const state_related_functions = v.get("STATE_RELATED_FUNCTIONS");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+            stateRelatedFunctionsArgument,
+            stateIndex1GetterArgument,
+
+            stateArrProp,
+            randomFuncPropAddr,
+            randomFuncPropFunc,
+            parentMemoryStorerProp,
+            memoryProp,
+            callerProp,
+            currentThisProp,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $address = ${pop}(${state}), 
-                $length = ${pop}(${state}),
-                $funcName = ${pop}(${state}),
-                $parentState = ${state_index1_getter}(${state}),
-                $stateFunction = ${state_related_functions}[2],
-                $dispatchHandler = ${state_related_functions}[3],
-                $randomProp = ${state_related_functions}[4],
+            var $address = ${popArgument}(${stateArgument}), 
+                $length = ${popArgument}(${stateArgument}),
+                $funcName = ${popArgument}(${stateArgument}),
+                $parentState = ${stateIndex1GetterArgument}(${stateArgument}),
+                $stateFunction = ${stateRelatedFunctionsArgument}[2],
+                $dispatchHandler = ${stateRelatedFunctionsArgument}[3],
+                $randomProp = ${stateRelatedFunctionsArgument}[4],
                 $targetFunc = function() {
                   var $funcState = $stateFunction();
-                  $funcState.${state_arr}[${ARGUMENTS_REG}] = arguments;
-                  for (var $idx = 0; $idx < arguments.length; $idx++) $funcState.${state_arr}[$idx + ${ARGUMENTS_SPREAD_REG}] = arguments[$idx];
-                  return $funcState.${state_arr}[1] = {
-                      ${current_this}: this,
-                      ${state_storer}: [0],
-                      ${memory}: [],
-                      ${parent_memory_keeper}: $parentState,
-                      ${caller}: $targetFunc,
-                  }, $funcState.${state_arr}[0] = $address, $dispatchHandler($funcState), $funcState.${state_arr}[${FUNCTION_RESULT_REG}]
+                  $funcState.${stateArrProp}[${ARGUMENTS_REG}] = arguments;
+                  for (var $idx = 0; $idx < arguments.length; $idx++) $funcState.${stateArrProp}[$idx + ${ARGUMENTS_SPREAD_REG}] = arguments[$idx];
+                  return $funcState.${stateArrProp}[1] = {
+                      ${currentThisProp}: this,
+                      ${stateArrProp}: [0],
+                      ${memoryProp}: [],
+                      ${parentMemoryStorerProp}: $parentState,
+                      ${callerProp}: $targetFunc,
+                  }, $funcState.${stateArrProp}[0] = $address, $dispatchHandler($funcState), $funcState.${stateArrProp}[${FUNCTION_RESULT_REG}]
                 };
             
             try {
@@ -243,454 +277,488 @@ export const instructionSet = [
             }
               
             $targetFunc[$randomProp] = {
-              ${random_func_prop_addr}: $address,
-              ${random_func_prop_parent}: $parentState,
-              ${random_func_prop_func}: $targetFunc
-            }, ${push}(${state}, $targetFunc)
+              ${randomFuncPropAddr}: $address,
+              ${parentMemoryStorerProp}: $parentState,
+              ${randomFuncPropFunc}: $targetFunc
+            }, ${pushArgument}(${stateArgument}, $targetFunc)
             `)
         },
     },
     {
         opcode: OperatorCode.Call,
         requiredArgs: 7,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const state_arr = v.get("STATE_ARR");
-            const random_func_prop_addr = v.get("RAND_FUNC_PROP_ADDR");
-            const random_func_prop_func = v.get("RAND_FUNC_PROP_FUNC");
-            const random_func_prop_parent = v.get("RAND_FUNC_PROP_PARENT");
-            const parent_memory_keeper = v.get("PARENT_MEMORY_KEEPER");
-            const memory = v.get("MEMORY");
-            const state_storer = v.get("STATE_STORER");
-            const current_this = v.get("CURRENT_THIS");
-            const caller = v.get("CALLER");
-            const state_related_functions = v.get("STATE_RELATED_FUNCTIONS");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            stateRelatedFunctionsArgument,
+
+            stateArrProp,
+            randomFuncPropAddr,
+            randomFuncPropFunc,
+            parentMemoryStorerProp,
+            memoryProp,
+            callerProp,
+            currentThisProp,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $callArgs = ${pop}(${state}),
-              $targetFunc = ${pop}(${state}),
-              $thisContext = ${pop}(${state}),
-              $randomFuncProp = ${state_related_functions}[4];
-            if ($targetFunc[$randomFuncProp] && $targetFunc[$randomFuncProp].${random_func_prop_func} === $targetFunc) {
-              ${state}.${state_arr} = [$targetFunc[$randomFuncProp].${random_func_prop_addr}, {
-                ${current_this}: $thisContext,
-                ${caller}: $targetFunc,
-                ${state_storer}: ${state}.${state_arr},
-                ${memory}: [],
-                ${parent_memory_keeper}: $targetFunc[$randomFuncProp].${random_func_prop_parent},
+            var $callArgs = ${popArgument}(${stateArgument}),
+              $targetFunc = ${popArgument}(${stateArgument}),
+              $thisContext = ${popArgument}(${stateArgument}),
+              $randomFuncProp = ${stateRelatedFunctionsArgument}[4];
+            if ($targetFunc[$randomFuncProp] && $targetFunc[$randomFuncProp].${randomFuncPropFunc} === $targetFunc) {
+              ${stateArgument}.${stateArrProp} = [$targetFunc[$randomFuncProp].${randomFuncPropAddr}, {
+                ${currentThisProp}: $thisContext,
+                ${callerProp}: $targetFunc,
+                ${stateArrProp}: ${stateArgument}.${stateArrProp},
+                ${memoryProp}: [],
+                ${parentMemoryStorerProp}: $targetFunc[$randomFuncProp].${parentMemoryStorerProp},
               }, void 0, function() {
                 return arguments
               }.apply(void 0, $callArgs)];
-              for (var $argIndex = 0; $argIndex < $callArgs.length; $argIndex++) ${state}.${state_arr}.push($callArgs[$argIndex]);
-            } else ${state}.${state_arr}[${FUNCTION_RESULT_REG}] = $targetFunc.apply($thisContext, $callArgs)
+              for (var $argIndex = 0; $argIndex < $callArgs.length; $argIndex++) ${stateArgument}.${stateArrProp}.push($callArgs[$argIndex]);
+            } else ${stateArgument}.${stateArrProp}[${FUNCTION_RESULT_REG}] = $targetFunc.apply($thisContext, $callArgs)
             `)
         },
     },
     {
         opcode: OperatorCode.New,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const push = v.get("PUSH");
-            const state = v.get("STATE");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $targetFunc = ${pop}(${state}),
-              $argArray = ${pop}(${state}).slice();
-            $argArray.unshift(void 0), ${push}(${state}, new (Function.bind.apply($targetFunc, $argArray)));
+            var $targetFunc = ${popArgument}(${stateArgument}),
+              $argArray = ${popArgument}(${stateArgument}).slice();
+            $argArray.unshift(void 0), ${pushArgument}(${stateArgument}, new (Function.bind.apply($targetFunc, $argArray)));
             `)
         },
     },
     {
         opcode: OperatorCode.Term,
         requiredArgs: 0,
-        templateFn: function (v: Map<string, string>): Template {
+        templateFn: function (_: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`return null`)
         },
     },
     {
         opcode: OperatorCode.Get,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state})[${pop}(${state})]);
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument})[${popArgument}(${stateArgument})]);
             `)
         },
     },
     {
         opcode: OperatorCode.Put,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pop}(${state})[${pop}(${state})] = ${pop}(${state})
+            ${popArgument}(${stateArgument})[${popArgument}(${stateArgument})] = ${popArgument}(${stateArgument})
             `)
         },
     },
     {
         opcode: OperatorCode.In,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) in ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) in ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.Delete,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $targetObj = ${pop}(${state}),
-                $propertyKey = ${pop}(${state});
-            ${push}(${state}, delete $targetObj[$propertyKey]);
+            var $targetObj = ${popArgument}(${stateArgument}),
+                $propertyKey = ${popArgument}(${stateArgument});
+            ${pushArgument}(${stateArgument}, delete $targetObj[$propertyKey]);
             `)
         },
     },
     {
-        opcode: OperatorCode.Eq ,
+        opcode: OperatorCode.Eq,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) == ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) == ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.Neq,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) != ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) != ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.Seq,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) === ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) === ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.SNeq,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) !== ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) !== ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.Lt,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) < ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) < ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.Lte,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) <= ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) <= ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.Gt,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) > ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) > ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.Gte,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) >= ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) >= ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.Add,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) + ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) + ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.Sub,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) - ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) - ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.Mul,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) * ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) * ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.Div,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) / ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) / ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.Mod,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) % ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) % ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.BNot,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ~${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ~${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.BOr,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) | ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) | ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.BXor,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) ^ ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) ^ ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.BAnd,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) & ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) & ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.LShift,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) << ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) << ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.RShift,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) >> ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) >> ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.UrShift,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) >>> ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) >>> ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.Not,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, !${pop}(${state}));
+            ${pushArgument}(${stateArgument}, !${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.InstanceOf,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${pop}(${state}) instanceof ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) instanceof ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.TypeOf,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, typeof ${pop}(${state}));
+            ${pushArgument}(${stateArgument}, typeof ${popArgument}(${stateArgument}));
             `)
         },
     },
     {
         opcode: OperatorCode.GetWindowProp,
         requiredArgs: 6,
-        templateFn: function (v: Map<string, string>): Template {
-            const push = v.get("PUSH");
-            const state = v.get("STATE");
-            const pop = v.get("POP");
-            const big_object_like_instances = v.get("BIG_OBJECT_LIKE_INSTANCES");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+            bigObjectLikeInstancesArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $global = ${big_object_like_instances}[0];
-            ${push}(${state}, $global[${pop}(${state})]);
+            var $global = ${bigObjectLikeInstancesArgument}[0];
+            ${pushArgument}(${stateArgument}, $global[${popArgument}(${stateArgument})]);
             `)
         },
     },
     {
         opcode: OperatorCode.SetCatchAddr,
         requiredArgs: 2,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const error_addr = v.get("ERROR_ADDR");
-            const state_arr = v.get("STATE_ARR");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+
+            catchAddrProp,
+            stateArrProp,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $address = ${pop}(${state});
-            ${state}.${state_arr}[1].${error_addr} = $address;
+            var $address = ${popArgument}(${stateArgument});
+            ${stateArgument}.${stateArrProp}[1].${catchAddrProp} = $address;
             `)
         },
     },
     {
         opcode: OperatorCode.SetFinallyAddr,
         requiredArgs: 2,
-        templateFn: function (v: Map<string, string>): Template {
-            const pop = v.get("POP");
-            const state = v.get("STATE");
-            const finally_addr = v.get("FINALLY_ADDR");
-            const state_arr = v.get("STATE_ARR");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+
+            finallyAddressProp,
+            stateArrProp,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $address = ${pop}(${state});
-            ${state}.${state_arr}[1].${finally_addr} = $address;
+            var $address = ${popArgument}(${stateArgument});
+            ${stateArgument}.${stateArrProp}[1].${finallyAddressProp} = $address;
             `)
         },
     },
     {
         opcode: OperatorCode.ThrowErrorOrDoFinally,
         requiredArgs: 7,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const error_object = v.get("ERROR_OBJECT");
-            const error = v.get("ERROR_OBJECT_VALUE");
-            const state_index1_getter = v.get("STATE_INDEX1_GETTER");
-            const func_result_storer = v.get("FUNC_RESULT_STORER");
-            const func_result_storer_value = v.get("FUNC_RESULT_STORER_VALUE");
-            const state_related_functions = v.get("STATE_RELATED_FUNCTIONS");
+        templateFn: function ({
+            stateArgument,
+            stateIndex1GetterArgument,
+
+            errorObjectProp,
+            funcResultStorerProp,
+            anyObjectPropSubprop,
+            stateRelatedFunctionsArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $bytecodeReturn = ${state_related_functions}[0]
-              , $exceptionHandler = ${state_related_functions}[1];
-            if (${state}.${error_object}) $exceptionHandler(${state}, ${state}.${error_object}.${error}); else {
-              var $state = ${state_index1_getter}(${state});
-              return $state != null && $state.${func_result_storer} && $bytecodeReturn(${state}, $state.${func_result_storer}.${func_result_storer_value})
+            var $bytecodeReturn = ${stateRelatedFunctionsArgument}[0]
+              , $exceptionHandler = ${stateRelatedFunctionsArgument}[1];
+            if (${stateArgument}.${errorObjectProp}) $exceptionHandler(${stateArgument}, ${stateArgument}.${errorObjectProp}.${anyObjectPropSubprop}); else {
+              var $state = ${stateIndex1GetterArgument}(${stateArgument});
+              return $state != null && $state.${funcResultStorerProp} && $bytecodeReturn(${stateArgument}, $state.${funcResultStorerProp}.${anyObjectPropSubprop})
             }
             `)
         },
@@ -698,177 +766,194 @@ export const instructionSet = [
     {
         opcode: OperatorCode.ThrowError,
         requiredArgs: 7,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const pop = v.get("POP");
-            const state_related_functions = v.get("STATE_RELATED_FUNCTIONS");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+
+            stateRelatedFunctionsArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $exceptionHandler = ${state_related_functions}[1]
-              , $error = ${pop}(${state});
-            $exceptionHandler(${state}, $error)
+            var $exceptionHandler = ${stateRelatedFunctionsArgument}[1]
+              , $error = ${popArgument}(${stateArgument});
+            $exceptionHandler(${stateArgument}, $error)
             `)
         },
     },
     {
         opcode: OperatorCode.PushError,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
-            const error_object = v.get("ERROR_OBJECT");
-            const error = v.get("ERROR_OBJECT_VALUE");
+        templateFn: function ({
+            stateArgument,
+            pushArgument,
+
+            errorObjectProp,
+            anyObjectPropSubprop,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${state}.${error_object} && ${state}.${error_object}.${error});
+            ${pushArgument}(${stateArgument}, ${stateArgument}.${errorObjectProp} && ${stateArgument}.${errorObjectProp}.${anyObjectPropSubprop});
             `)
         },
     },
     {
         opcode: OperatorCode.VoidError,
         requiredArgs: 1,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const error_object = v.get("ERROR_OBJECT");
+        templateFn: function ({
+            stateArgument,
+
+            errorObjectProp,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${state}.${error_object} = void 0;
+            ${stateArgument}.${errorObjectProp} = void 0;
             `)
         },
     },
     {
         opcode: OperatorCode.GetCurrentThis,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
-            const state_arr = v.get("STATE_ARR");
-            const current_this = v.get("CURRENT_THIS");
+        templateFn: function ({
+            stateArgument,
+            pushArgument,
+
+            stateArrProp,
+            currentThisProp,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${push}(${state}, ${state}.${state_arr}[1].${current_this});
+            ${pushArgument}(${stateArgument}, ${stateArgument}.${stateArrProp}[1].${currentThisProp});
             `)
         },
     },
     {
         opcode: OperatorCode.ReturnValue,
         requiredArgs: 7,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const pop = v.get("POP");
-            const state_related_functions = v.get("STATE_RELATED_FUNCTIONS");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            stateRelatedFunctionsArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $bytecodeReturn = ${state_related_functions}[0],
-                $value = ${pop}(${state});
-            return $bytecodeReturn(${state}, $value);
+            var $bytecodeReturn = ${stateRelatedFunctionsArgument}[0],
+                $value = ${popArgument}(${stateArgument});
+            return $bytecodeReturn(${stateArgument}, $value);
             `)
         },
     },
     {
         opcode: OperatorCode.ReturnVoid,
         requiredArgs: 7,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const state_related_functions = v.get("STATE_RELATED_FUNCTIONS");
+        templateFn: function ({
+            stateArgument,
+            stateRelatedFunctionsArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $bytecodeReturn = ${state_related_functions}[0];
-            return $bytecodeReturn(${state}, void 0);
+            var $bytecodeReturn = ${stateRelatedFunctionsArgument}[0];
+            return $bytecodeReturn(${stateArgument}, void 0);
             `)
         },
     },
     {
         opcode: OperatorCode.ForIn,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
-            const pop = v.get("POP");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $object = ${pop}(${state})
+            var $object = ${popArgument}(${stateArgument})
               , $items = [];
             for (var item in $object) $items.push(item);
-            ${push}(${state}, $items);
+            ${pushArgument}(${stateArgument}, $items);
             `)
         },
     },
     {
         opcode: OperatorCode.Promise,
         requiredArgs: 6,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
-            const big_object_like_instances = v.get("BIG_OBJECT_LIKE_INSTANCES");
+        templateFn: function ({
+            stateArgument,
+            pushArgument,
+            bigObjectLikeInstancesArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $asyncCommon = ${big_object_like_instances}[1];
-            ${push}(${state}, $asyncCommon[0]);
+            var $asyncCommon = ${bigObjectLikeInstancesArgument}[1];
+            ${pushArgument}(${stateArgument}, $asyncCommon[0]);
             `)
         },
     },
     {
         opcode: OperatorCode.Regenerator,
         requiredArgs: 6,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
-            const big_object_like_instances = v.get("BIG_OBJECT_LIKE_INSTANCES");
+        templateFn: function ({
+            stateArgument,
+            pushArgument,
+            bigObjectLikeInstancesArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $asyncCommon = ${big_object_like_instances}[1];
-            ${push}(${state}, $asyncCommon[1]);
+            var $asyncCommon = ${bigObjectLikeInstancesArgument}[1];
+            ${pushArgument}(${stateArgument}, $asyncCommon[1]);
             `)
         },
     },
     {
         opcode: OperatorCode.CallFunction0Arg,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
-            const pop = v.get("POP");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $func = ${pop}(${state});
-            ${push}(${state}, $func());
+            var $func = ${popArgument}(${stateArgument});
+            ${pushArgument}(${stateArgument}, $func());
             `)
         },
     },
     {
         opcode: OperatorCode.CallFunction1Arg,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
-            const pop = v.get("POP");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $func = ${pop}(${state}),
-                $arg1 = ${pop}(${state});
-            ${push}(${state}, $func($arg1));
+            var $func = ${popArgument}(${stateArgument}),
+                $arg1 = ${popArgument}(${stateArgument});
+            ${pushArgument}(${stateArgument}, $func($arg1));
             `)
         },
     },
     {
         opcode: OperatorCode.CallFunction2Arg,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
-            const pop = v.get("POP");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $func = ${pop}(${state}),
-                $arg1 = ${pop}(${state}),
-                $arg2 = ${pop}(${state});
-            ${push}(${state}, $func($arg1, $arg2));
+            var $func = ${popArgument}(${stateArgument}),
+                $arg1 = ${popArgument}(${stateArgument}),
+                $arg2 = ${popArgument}(${stateArgument});
+            ${pushArgument}(${stateArgument}, $func($arg1, $arg2));
             `)
         },
     },
     {
         opcode: OperatorCode.CallFunction3Arg,
         requiredArgs: 3,
-        templateFn: function (v: Map<string, string>): Template {
-            const state = v.get("STATE");
-            const push = v.get("PUSH");
-            const pop = v.get("POP");
+        templateFn: function ({
+            stateArgument,
+            popArgument,
+            pushArgument,
+        }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $func = ${pop}(${state}),
-                $arg1 = ${pop}(${state}),
-                $arg2 = ${pop}(${state}),
-                $arg3 = ${pop}(${state});
-            ${push}(${state}, $func($arg1, $arg2, $arg3));
-            `)
+            var $func = ${popArgument}(${stateArgument}),
+                $arg1 = ${popArgument}(${stateArgument}),
+                $arg2 = ${popArgument}(${stateArgument}),
+                $arg3 = ${popArgument}(${stateArgument});
+            ${pushArgument}(${stateArgument}, $func($arg1, $arg2, $arg3));
+            `);
         },
     },
 ] as const satisfies (ReadonlyArray<Instruction> & { length: NumOpCodes });
@@ -878,7 +963,7 @@ export function getInstructionFromOpcode(opcode: OperatorCode): Instruction {
 }
 
 export function compileASTInstructionHandlers(
-    variableNames: Map<string, string>,
+    variableNames: InstructionAccesibleVariableEnvironment,
     instructionHandlerArguments: Array<t.Identifier>,
 ): Array<t.FunctionExpression> {
     const opcodeNames = Object.keys(OperatorCode).filter((v) => isNaN(Number(v)));

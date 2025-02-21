@@ -1,10 +1,9 @@
 import { writeFileSync } from "fs";
-import Compiler from "../Sources/Compiler";
-import ProgramBuilder from "../Sources/ProgramBuilder";
+import { Compiler, InterpreterBuilder } from "../";
 
 export let window: any;
 export let compiler: Compiler;
-export let programBuilder: ProgramBuilder;
+export let interpreterBuilder: InterpreterBuilder;
 
 const originalWindowProps: Set<string> = new Set();
 
@@ -44,7 +43,7 @@ beforeAll(() => {
     });
 
     compiler = new Compiler();
-    programBuilder = new ProgramBuilder();
+    interpreterBuilder = new InterpreterBuilder();
 });
 
 function safelyEndTesting(failedCode: string, failError: Error): void {
@@ -74,7 +73,7 @@ export const executeCode = async (code: string): Promise<void> => {
     compiler.compile(code);
 
     const bytecode = compiler.constructBytecode();
-    const compiledCode = await programBuilder.build(bytecode);
+    const compiledCode = await interpreterBuilder.build(bytecode);
 
     try {
         eval(compiledCode);
@@ -93,7 +92,7 @@ export const executeShouldThrownCode = async (code: string): Promise<unknown> =>
     compiler.compile(code);
 
     const bytecode = compiler.constructBytecode();
-    const compiledCode = await programBuilder.build(bytecode);
+    const compiledCode = await interpreterBuilder.build(bytecode);
 
     try {
         eval(compiledCode);

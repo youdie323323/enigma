@@ -1,5 +1,6 @@
-import Template from "../ProgramBuilder/Templates/Template";
-import { OperatorCode } from "./";
+import { OperatorCode } from "../Compiler/CompilerOperatorCode";
+import Template from "../Interpreter/Builder/Templates/Template";
+import { InstructionAccesibleVariableEnvironment } from "./InstructionAccesibleVariableEnvironment";
 
 export default interface Instruction {
     /**
@@ -15,5 +16,5 @@ export default interface Instruction {
     /**
      * Generate ast of operation handler.
      */
-    templateFn(variableNames: Map<string, string>): Template;
+    templateFn(variableNames: InstructionAccesibleVariableEnvironment): Template;
 }

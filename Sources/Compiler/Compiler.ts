@@ -7,13 +7,19 @@ import {
 import RegisterAllocator from './Register/RegisterAllocator';
 import UniqueIdentifier from './CompilerUniqueIdentifier';
 import { Memoize } from './CompilerMemoize';
-import { OperatorCode, ARGUMENTS_REG, ARGUMENTS_SPREAD_REG, FUNCTION_RESULT_REG } from '../Instruction';
 import type { IR, IRNumericalData, IRLabel, IROpcode, IRReference, IRStringData } from './CompilerIntermediateRepresentation';
 import { labelSymbol, referenceSymbol, opcodeSymbol, stringDataSymbol, numericalDataSymbol } from './CompilerIntermediateRepresentation';
-import { getFiniteLikeCallOperator, isFiniteLikeCallOperatorCodeArgumentCounts } from '../Instruction/InstructionOperatorCode';
-import { type Bytecode } from '../ProgramBuilder/Bytecode/Bytecode';
 import { createRegister, type Register, registerToNumber } from './Register/Register';
-import { shuffle } from '../ProgramBuilder/Bytecode/BytecodeTranscoderProvider';
+import { type Bytecode } from '../Interpreter/Builder/Bytecode/Bytecode';
+import { shuffle } from '../Interpreter/Builder/Bytecode/BytecodeTranscoderProvider';
+import {
+  isFiniteLikeCallOperatorCodeArgumentCounts,
+  getFiniteLikeCallOperatorCode,
+  ARGUMENTS_REG,
+  ARGUMENTS_SPREAD_REG,
+  FUNCTION_RESULT_REG,
+  OperatorCode
+} from './CompilerOperatorCode';
 
 type ControlBlock = { label?: string; continue?: string; break?: string };
 
@@ -1370,7 +1376,7 @@ export default class Compiler {
             args.forEach((arg, i) => argsReg[i] = this.createRegId(this.compileExpression(arg as t.Expression)));
 
             // CALL_FUNCTION_XARG funcReg(...args) -> callReg
-            this.writeInstructions(this.createOp(getFiniteLikeCallOperator(args.length)), this.createRegId(funcReg), ...argsReg, this.createRegId(callReg));
+            this.writeInstructions(this.createOp(getFiniteLikeCallOperatorCode(args.length)), this.createRegId(funcReg), ...argsReg, this.createRegId(callReg));
 
             // Free args
             args.forEach(() => this.registerAllocator.free());

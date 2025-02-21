@@ -27,6 +27,8 @@ export const REGENERATOR_RUNTIME_FUNCTION_IDENTIFIER = "_regeneratorRuntime";
 export type CompilableBlock = t.Program | t.FunctionDeclaration | t.FunctionExpression;
 
 const babelOptions: TransformOptions = {
+  // Ignore babel.config.js
+  configFile: false,
   plugins: [
     // Why only this plugin doesnt included in preset plugin list? the website said its included on preset-env but i checked
     // plugin list and doesnt in the list

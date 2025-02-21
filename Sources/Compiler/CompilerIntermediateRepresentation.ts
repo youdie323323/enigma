@@ -1,4 +1,4 @@
-import { OperatorCode } from "../Instruction";
+import { OperatorCode } from "./CompilerOperatorCode";
 
 type CompilerIR<T extends symbol, U extends object> = { type: T } & U;
 

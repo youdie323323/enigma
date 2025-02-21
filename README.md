@@ -41,7 +41,7 @@ $ npm install enigma-vm
 ### Usage Example
 
 ```ts
-import { Compiler, ProgramBuilder } from "enigma-vm";
+import { Compiler, InterpreterBuilder } from "enigma-vm";
 
 (async function () {
   const compiler = new Compiler();
@@ -59,7 +59,7 @@ import { Compiler, ProgramBuilder } from "enigma-vm";
   compiler.compile(input);
 
   const bytecode = compiler.constructBytecode();
-  const code = await new ProgramBuilder().build(bytecode);
+  const code = await new InterpreterBuilder().build(bytecode);
 
   console.log(code);
 })();
