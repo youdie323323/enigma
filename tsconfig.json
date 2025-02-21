@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "lib": ["esnext"],
-    "module": "Node16",
-    "target": "ES6",
+    "lib": ["ESNext"],
+    "module": "NodeNext",
+    "target": "ESNext",
     "strict": true,
     "esModuleInterop": true,
-    "moduleResolution": "node16",
+    "moduleResolution": "NodeNext",
     "outDir": "./Dist",
     "skipLibCheck": true,
     "noImplicitAny": false,

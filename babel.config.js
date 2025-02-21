@@ -4,10 +4,10 @@ module.exports = {
         "@babel/preset-typescript",
     ],
     plugins: [
-        ["@babel/plugin-syntax-explicit-resource-management", { loose: true }],
-        ["@babel/plugin-proposal-decorators", { legacy: true, loose: true }],
-        ["@babel/plugin-proposal-class-properties", { loose: true }],
-        ["@babel/plugin-transform-private-methods", { loose: true }],
-        ["@babel/plugin-transform-private-property-in-object", { loose: true }]
+        ["@babel/plugin-syntax-explicit-resource-management"],
+        ["@babel/plugin-proposal-decorators", { legacy: true }],
+        ["@babel/plugin-proposal-class-properties", { loose: false }],
+        ["@babel/plugin-transform-private-methods", { loose: false }],
+        ["@babel/plugin-transform-private-property-in-object", { loose: false }]
     ]
 };
