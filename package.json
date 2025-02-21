@@ -1,6 +1,6 @@
 {
     "name": "enigma-vm",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "private": false,
     "description": "The first publicly available better javascript virtual machine obfuscator",
     "keywords": [
