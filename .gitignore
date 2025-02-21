@@ -139,3 +139,5 @@ samples/
 
 # Test failed output file
 dev.output.js
+
+Dist/
