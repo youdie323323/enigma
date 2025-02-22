@@ -8,9 +8,10 @@ import { compileASTInstructionHandlers } from "../../Instruction";
 import BytecodeTranscoderProvider, { shuffle } from "./Bytecode/BytecodeTranscoderProvider";
 import unraw from "unraw";
 import { type Bytecode } from "./Bytecode/Bytecode";
-import { OperatorCode, FUNCTION_RESULT_REG } from "../../Compiler/CompilerOperatorCode";
-import { InterpreterDefaultVariableEnvironment } from "./InterpreterDefaultVariableEnvironment";
-import { InstructionAccesibleVariableEnvironment, InstructionArgumentEnvironment } from "../../Instruction/InstructionAccesibleVariableEnvironment";
+import { FUNCTION_RESULT_REG } from "../../Compiler/CompilerOperatorCode";
+import { ArrayVariableEnvironment, FunctionVariableEnvironment, InterpreterDefaultEnvironment, NumberVariableEnvironment, ObjectVariableEnvironment, PropertyKeyEnvironment, StringVariableEnvironment } from "./InterpreterDefaultEnvironment";
+import { InstructionAccesibleEnvironment, InstructionArgumentEnvironment } from "../../Instruction/InstructionAccesibleEnvironment";
+import { LiteralId } from "../../Compiler/CompilerLiteralId";
 
 const LICENSE_PATTERN = /(?:^[!@]|^@(?:preserve|license|copyright)|^\s*(?:MIT|MPL|GPL|LGPL|BSD|ISC|Apache|UNLICENSED)\b|\([Cc]\)|[Ll]icen[cs]e|[Cc]opyright|\u00A9)/m;
 
@@ -31,64 +32,80 @@ export default class InterpreterBuilder {
 
         const programNodes: Array<t.Statement> = [];
 
-        const { variableGenerator } = this;
+        const generateIdentifier = this.variableGenerator.generateIdentifier.bind(this.variableGenerator);
 
-        const defaultVariableEnvironment = {
-            decoder: variableGenerator.generateIdentifier(),
-            decodedBytecode: variableGenerator.generateIdentifier(),
-            stringObject: variableGenerator.generateIdentifier(),
-            vmStateFunction: variableGenerator.generateIdentifier(),
-            vmStateObject: variableGenerator.generateIdentifier(),
-            literalIdsArray: variableGenerator.generateIdentifier(),
-            popFunction: variableGenerator.generateIdentifier(),
-            pushFunction: variableGenerator.generateIdentifier(),
-            instructionSet: variableGenerator.generateIdentifier(),
-            dispatcherFunction: variableGenerator.generateIdentifier(),
+        const defaultEnvironment = {
+            ...{
+                stringSlicerPropKey: generateIdentifier(),
+                finallyAddressPropKey: generateIdentifier(),
+                currentThisPropKey: generateIdentifier(),
+                stateArrayPropKey: generateIdentifier(),
+                errorObjectPropKey: generateIdentifier(),
+                anyObjectPropSubPropKey: generateIdentifier(),
+                parentMemoryPropKey: generateIdentifier(),
+                funcResultObjectPropKey: generateIdentifier(),
+                stringDumpPropKey: generateIdentifier(),
+                catchAddressPropKey: generateIdentifier(),
+                memoryPropKey: generateIdentifier(),
+                callerPropKey: generateIdentifier(),
 
-            stringSlicerProp: variableGenerator.generateIdentifier(),
-            finallyAddressProp: variableGenerator.generateIdentifier(),
-            currentThisProp: variableGenerator.generateIdentifier(),
-            stateArrProp: variableGenerator.generateIdentifier(),
-            errorObjectProp: variableGenerator.generateIdentifier(),
-            anyObjectPropSubprop: variableGenerator.generateIdentifier(),
-            parentMemoryStorerProp: variableGenerator.generateIdentifier(),
-            randomFuncPropAddr: variableGenerator.generateIdentifier(),
-            funcResultStorerProp: variableGenerator.generateIdentifier(),
-            randomFuncProp: variableGenerator.generateIdentifier(),
-            stringDumpProp: variableGenerator.generateIdentifier(),
-            catchAddrProp: variableGenerator.generateIdentifier(),
-            memoryProp: variableGenerator.generateIdentifier(),
-            randomFuncPropFunc: variableGenerator.generateIdentifier(),
-            callerProp: variableGenerator.generateIdentifier(),
+                randomFuncPropKey: generateIdentifier(),
+                randomFuncPropAddrPropKey: generateIdentifier(),
+                randomFuncPropFuncPropKey: generateIdentifier(),
+            } satisfies PropertyKeyEnvironment,
 
-            literalLoaderAliasFunction: variableGenerator.generateIdentifier(),
-            literalLoaderFunction: variableGenerator.generateIdentifier(),
-            exceptionHandlerFunction: variableGenerator.generateIdentifier(),
-            stateIndex1GetterFunction: variableGenerator.generateIdentifier(),
-            globalObject: variableGenerator.generateIdentifier(),
-            bytecode: variableGenerator.generateIdentifier(),
-            bytecodeLength: variableGenerator.generateIdentifier(),
-            bytecodeReturnFunction: variableGenerator.generateIdentifier(),
-            promise: variableGenerator.generateIdentifier(),
-            regeneratorRuntime: variableGenerator.generateIdentifier(),
-            bytecodeLengthAndTrueLength: variableGenerator.generateIdentifier(),
-            literalLength: variableGenerator.generateIdentifier(),
-            loadRegFunction: variableGenerator.generateIdentifier(),
-        } as const satisfies InterpreterDefaultVariableEnvironment;
+            ...{
+                literalIdsArray: generateIdentifier(),
+                decodedBytecodeArray: generateIdentifier(),
+                instructionSetArray: generateIdentifier(),
+            } satisfies ArrayVariableEnvironment,
 
-        const randomizedLiteralOpcodes: Array<OperatorCode> = shuffle([
-            OperatorCode.Null,
-            OperatorCode.StoreOrLoadStr,
-            OperatorCode.Num,
-            OperatorCode.True,
-            OperatorCode.False,
-            OperatorCode.FakePlaceholder,
+            ...{
+                bytecodeString: generateIdentifier(),
+                literallyLengthString: generateIdentifier(),
+            } satisfies StringVariableEnvironment,
+
+            ...{
+                decodedBytecodeLengthNumber: generateIdentifier(),
+                decodedBytecodeLengthAndTrueLengthNumber: generateIdentifier(),
+            } satisfies NumberVariableEnvironment,
+
+            ...{
+                decoderFunction: generateIdentifier(),
+                vmStateFunction: generateIdentifier(),
+                popFunction: generateIdentifier(),
+                pushFunction: generateIdentifier(),
+                dispatcherFunction: generateIdentifier(),
+                literalLoaderAliasFunction: generateIdentifier(),
+                literalLoaderFunction: generateIdentifier(),
+                exceptionHandlerFunction: generateIdentifier(),
+                stateIndex1GetterFunction: generateIdentifier(),
+                bytecodeReturnFunction: generateIdentifier(),
+                loadRegisterFunction: generateIdentifier(),
+            } satisfies FunctionVariableEnvironment,
+
+            ...{
+                stringObject: generateIdentifier(),
+                vmStateObject: generateIdentifier(),
+                globalObject: generateIdentifier(),
+                promiseObject: generateIdentifier(),
+                regeneratorRuntimeObject: generateIdentifier(),
+            } satisfies ObjectVariableEnvironment,
+        } as const satisfies InterpreterDefaultEnvironment;
+
+        const randomizedLiteralIds: Array<LiteralId> = shuffle([
+            LiteralId.Null,
+            LiteralId.StoreOrLoadStr,
+            LiteralId.Num,
+            LiteralId.True,
+            LiteralId.False,
+            LiteralId.FakePlaceholder,
         ]);
 
         const randomizedLiteralBranches = shuffle([
-            `if (result !== literalOps[${randomizedLiteralOpcodes.indexOf(OperatorCode.FakePlaceholder)}]) {`,
+            `if (result !== literalIds[${randomizedLiteralIds.indexOf(LiteralId.FakePlaceholder)}]) {`,
             `
-                if (result === literalOps[${randomizedLiteralOpcodes.indexOf(OperatorCode.Num)}]) {
+                if (result === literalIds[${randomizedLiteralIds.indexOf(LiteralId.Num)}]) {
                     var high = bytecode[vmState[0]++],
                         low = bytecode[vmState[0]++],
                         sign = high & 2147483648 ? -1 : 1,
@@ -97,10 +114,10 @@ export default class InterpreterBuilder {
                     return exponent === 2047 ? mantissa ? NaN : sign * (1 / 0) : (exponent !== 0 ? mantissa += Math.pow(2, 52) : exponent++, sign * mantissa * Math.pow(2, exponent - 1075));
                 }
             `,
-            `   if (result === literalOps[${randomizedLiteralOpcodes.indexOf(OperatorCode.Null)}]) return null;`,
+            `   if (result === literalIds[${randomizedLiteralIds.indexOf(LiteralId.Null)}]) return null;`,
             `
-                if (result === literalOps[${randomizedLiteralOpcodes.indexOf(OperatorCode.StoreOrLoadStr)}]) {
-                    if (stringObject != null && stringObject.{stringSlicerProp}) return stringObject.{stringSlicerProp}(bytecode[vmState[0]++], bytecode[vmState[0]++]);
+                if (result === literalIds[${randomizedLiteralIds.indexOf(LiteralId.StoreOrLoadStr)}]) {
+                    if (stringObject != null && stringObject.{stringSlicerPropKey}) return stringObject.{stringSlicerPropKey}(bytecode[vmState[0]++], bytecode[vmState[0]++]);
                     for (var str = '', length = bytecode[vmState[0]++], index = 0; index < length; index++) {
                         var charCode = bytecode[vmState[0]++];
                         str += String.fromCharCode(charCode & 0xFFFFFFC0 | charCode * 39 & 0x3F);
@@ -108,8 +125,8 @@ export default class InterpreterBuilder {
                     return str;
                 }
             `,
-            `   if (result === literalOps[${randomizedLiteralOpcodes.indexOf(OperatorCode.True)}]) return !0;`,
-            `   if (result === literalOps[${randomizedLiteralOpcodes.indexOf(OperatorCode.False)}]) return !1;`,
+            `   if (result === literalIds[${randomizedLiteralIds.indexOf(LiteralId.True)}]) return !0;`,
+            `   if (result === literalIds[${randomizedLiteralIds.indexOf(LiteralId.False)}]) return !1;`,
         ]).concat(
             "   return vmState[result >> 5]",
             "}"
@@ -119,15 +136,15 @@ export default class InterpreterBuilder {
             encodingRadix = BytecodeTranscoderProvider.radix;
 
         programNodes.push(
-            ...BytecodeTranscoderProvider.decoder.compile(defaultVariableEnvironment),
+            ...BytecodeTranscoderProvider.decoder.compile(defaultEnvironment),
             ...new Template(`
-            var {bytecode} = "{encoded}",
-                {literalLength} = "length",
-                {decodedBytecode} = {decoder}({bytecode}, "{table}", {radix}),
-                {bytecodeLength} = {decodedBytecode}[{literalLength}];
+            var {bytecodeString} = "{encoded}",
+                {literallyLengthString} = "length",
+                {decodedBytecodeArray} = {decoderFunction}({bytecodeString}, "{table}", {radix}),
+                {decodedBytecodeLengthNumber} = {decodedBytecodeArray}[{literallyLengthString}];
             `).compile(
                 {
-                    ...defaultVariableEnvironment,
+                    ...defaultEnvironment,
 
                     encoded: BytecodeTranscoderProvider.encode(bytecode, encodingTable, encodingRadix),
                     table: encodingTable,
@@ -136,65 +153,65 @@ export default class InterpreterBuilder {
             ),
             ...new Template(`
             function {stateIndex1GetterFunction}(state) {
-                return state.{stateArrProp}[1]
+                return state.{stateArrayPropKey}[1]
             }
-            `).compile(defaultVariableEnvironment),
+            `).compile(defaultEnvironment),
             ...new Template(`
-            for (var {randomFuncProp} = "", {bytecodeLengthAndTrueLength} = {bytecodeLength} + ({randomFuncProp} + !0)[{literalLength}], {stringObject} = {
-                {stringDumpProp}: ""
-            }, {temp} = 0; {temp} < 28; {temp}++) {randomFuncProp} += String.fromCharCode(97 + Math.floor(26 * Math.random()));
+            for (var {randomFuncPropKey} = "", {decodedBytecodeLengthAndTrueLengthNumber} = {decodedBytecodeLengthNumber} + ({randomFuncPropKey} + !0)[{literallyLengthString}], {stringObject} = {
+                {stringDumpPropKey}: ""
+            }, {temp} = 0; {temp} < 28; {temp}++) {randomFuncPropKey} += String.fromCharCode(97 + Math.floor(26 * Math.random()));
             `).compile({
-                ...defaultVariableEnvironment,
+                ...defaultEnvironment,
 
-                temp: variableGenerator.generateIdentifier(),
+                temp: generateIdentifier(),
             }),
         );
 
         programNodes.push(
             ...new Template(`
             var {globalObject} = window,
-                {promise} = {globalObject}.Promise;
-            `).compile(defaultVariableEnvironment),
+                {promiseObject} = {globalObject}.Promise;
+            `).compile(defaultEnvironment),
         );
 
         programNodes.push(
             ...new Template(`
-            function {loadRegFunction}(state) {
-                return {decodedBytecode}[state.{stateArrProp}[0]++] >> 5
+            function {loadRegisterFunction}(state) {
+                return {decodedBytecodeArray}[state.{stateArrayPropKey}[0]++] >> 5
             }
             
             function {vmStateFunction}() {
                 // One for instruction pointer
                 var mainState = [1, {
-                    {currentThisProp}: {globalObject},
-                    {callerProp}: null,
-                    {memoryProp}: [],
-                    {stateArrProp}: [0],
-                    {parentMemoryStorerProp}: void 0,
+                    {currentThisPropKey}: {globalObject},
+                    {callerPropKey}: null,
+                    {memoryPropKey}: [],
+                    {stateArrayPropKey}: [0],
+                    {parentMemoryPropKey}: void 0,
                 }, void 0];
                 return {
-                    {stateArrProp}: mainState,
-                    {errorObjectProp}: void 0,
+                    {stateArrayPropKey}: mainState,
+                    {errorObjectPropKey}: void 0,
                 }
             }
             
             function {exceptionHandlerFunction}(state, err) {
-                for (;;) {
-                    var nextState = state.{stateArrProp}[1];
+                for (; ;) {
+                    var nextState = state.{stateArrayPropKey}[1];
 
                     // Throw err if context is nullish (theres no valid try-catch)
                     if (!nextState) throw err;
 
                     // Found try-catch, set error then jump to catch address
-                    if (nextState.{catchAddrProp}) {
-                        state.{errorObjectProp} = {
-                          {anyObjectPropSubprop}: err,
-                        }, state.{stateArrProp}[0] = nextState.{catchAddrProp};
+                    if (nextState.{catchAddressPropKey}) {
+                        state.{errorObjectPropKey} = {
+                          {anyObjectPropSubPropKey}: err,
+                        }, state.{stateArrayPropKey}[0] = nextState.{catchAddressPropKey};
                         return;
                     }
                     
                     // Traverse state and find try-catch
-                    state.{stateArrProp} = nextState.{stateArrProp};
+                    state.{stateArrayPropKey} = nextState.{stateArrayPropKey};
                 }
             }
             
@@ -202,85 +219,85 @@ export default class InterpreterBuilder {
             var {vmStateObject} = {vmStateFunction}();
 
             function {pushFunction}(state, elem) {
-                state.{stateArrProp}[{loadRegFunction}(state)] = elem
+                state.{stateArrayPropKey}[{loadRegisterFunction}(state)] = elem
             }
             
             // Literal loader section
-            var {literalLoaderFunction} = function (bytecode, vmState, literalOps, stringObject) {
+            var {literalLoaderFunction} = function (bytecode, vmState, literalIds, stringObject) {
                     var result = bytecode[vmState[0]++];
                     if (result & 1) return result >> 1;
                     ${randomizedLiteralBranches.join("\n")}
                 }, 
-                {literalIdsArray} = ${JSON.stringify(randomizedLiteralOpcodes)};
+                {literalIdsArray} = ${JSON.stringify(randomizedLiteralIds)};
 
             // Load string section
             {
-                {stringObject}.{stringSlicerProp} = function(start, length) {
-                    return {stringObject}.{stringDumpProp}.slice(start, start + length)
+                {stringObject}.{stringSlicerPropKey} = function(start, length) {
+                    return {stringObject}.{stringDumpPropKey}.slice(start, start + length)
                 }
-                var {temp} = {decodedBytecode}[{bytecodeLength} + {randomFuncProp}.indexOf(".")] ^ {bytecodeLengthAndTrueLength},
-                    {temp2} = {decodedBytecode}.splice({temp}, {decodedBytecode}[{temp} + {vmStateObject}.{stateArrProp}[0]] + 2);
-                {stringObject}.{stringDumpProp} = {literalLoaderFunction}({temp2}, {vmStateObject}.{stateArrProp}[1].{stateArrProp}, {literalIdsArray});
+                var {temp} = {decodedBytecodeArray}[{decodedBytecodeLengthNumber} + {randomFuncPropKey}.indexOf(".")] ^ {decodedBytecodeLengthAndTrueLengthNumber},
+                    {temp2} = {decodedBytecodeArray}.splice({temp}, {decodedBytecodeArray}[{temp} + {vmStateObject}.{stateArrayPropKey}[0]] + 2);
+                {stringObject}.{stringDumpPropKey} = {literalLoaderFunction}({temp2}, {vmStateObject}.{stateArrayPropKey}[1].{stateArrayPropKey}, {literalIdsArray});
             }
 
             function {literalLoaderAliasFunction}(state) {
-                return {literalLoaderFunction}({decodedBytecode}, state.{stateArrProp}, {literalIdsArray}, {stringObject})
+                return {literalLoaderFunction}({decodedBytecodeArray}, state.{stateArrayPropKey}, {literalIdsArray}, {stringObject})
             }
 
             function {bytecodeReturnFunction}(state, returnValue) {
                 var $state = {stateIndex1GetterFunction}(state);
-                return $state.{funcResultStorerProp} = {
-                    {anyObjectPropSubprop}: returnValue,
+                return $state.{funcResultObjectPropKey} = {
+                    {anyObjectPropSubPropKey}: returnValue,
                 }, 
-                    $state.{finallyAddressProp} ? state.{stateArrProp}[0] = $state.{finallyAddressProp} : 
-                        ($state.{stateArrProp}.length == 1 ? (state.{stateArrProp}[${FUNCTION_RESULT_REG}] = returnValue, null) : 
-                            (state.{stateArrProp} = $state.{stateArrProp}, state.{stateArrProp}[${FUNCTION_RESULT_REG}] = returnValue, void 0));
+                    $state.{finallyAddressPropKey} ? state.{stateArrayPropKey}[0] = $state.{finallyAddressPropKey} : 
+                        ($state.{stateArrayPropKey}.length == 1 ? (state.{stateArrayPropKey}[${FUNCTION_RESULT_REG}] = returnValue, null) : 
+                            (state.{stateArrayPropKey} = $state.{stateArrayPropKey}, state.{stateArrayPropKey}[${FUNCTION_RESULT_REG}] = returnValue, void 0));
             }
             `).compile({
-                ...defaultVariableEnvironment,
+                ...defaultEnvironment,
 
-                temp: variableGenerator.generateIdentifier(),
-                temp2: variableGenerator.generateIdentifier(),
+                temp: generateIdentifier(),
+                temp2: generateIdentifier(),
             })
         );
 
-        const stateArgument = variableGenerator.generateIdentifier();
-        const popArgument = variableGenerator.generateIdentifier();
-        const pushArgument = variableGenerator.generateIdentifier();
-        const stateIndex1GetterArgument = variableGenerator.generateIdentifier();
-        const bigObjectLikeInstancesArgument = variableGenerator.generateIdentifier();
-        const stateRelatedFunctionsArgument = variableGenerator.generateIdentifier();
+        const stateArg = generateIdentifier();
+        const popArg = generateIdentifier();
+        const pushArg = generateIdentifier();
+        const stateIndex1GetterArg = generateIdentifier();
+        const bigObjectLikeInstancesArg = generateIdentifier();
+        const stateRelatedFunctionsArg = generateIdentifier();
 
         const callerArguments = [
-            "state",                                              // stateArgument
-            defaultVariableEnvironment.literalLoaderAliasFunction,        // popArgument
-            defaultVariableEnvironment.pushFunction,              // pushArgument
-            defaultVariableEnvironment.stateIndex1GetterFunction, // stateIndex1GetterArgument
-            "bigObjectLikeInstances",                             // bigObjectLikeInstancesArgument
-            "stateRelatedFunctions",                              // stateRelatedFunctionsArgument
+            "state",                                       // stateArgument
+            defaultEnvironment.literalLoaderAliasFunction, // popArgument
+            defaultEnvironment.pushFunction,               // pushArgument
+            defaultEnvironment.stateIndex1GetterFunction,  // stateIndex1GetterArgument
+            "bigObjectLikeInstances",                      // bigObjectLikeInstancesArgument
+            "stateRelatedFunctions",                       // stateRelatedFunctionsArgument
         ];
 
-        const instructionAccesibleVariableEnvironment = Object.assign(
-            defaultVariableEnvironment,
+        const instructionAccesibleEnvironment = Object.assign(
+            defaultEnvironment,
             {
-                stateArg: stateArgument,
-                popArg: popArgument,
-                pushArg: pushArgument,
-                stateIndex1GetterArg: stateIndex1GetterArgument,
-                bigObjectLikeInstancesArg: bigObjectLikeInstancesArgument,
-                stateRelatedFunctionsArg: stateRelatedFunctionsArgument,
+                stateArg,
+                popArg,
+                pushArg,
+                stateIndex1GetterArg,
+                bigObjectLikeInstancesArg,
+                stateRelatedFunctionsArg,
             } satisfies InstructionArgumentEnvironment,
-        ) satisfies InstructionAccesibleVariableEnvironment;
+        ) satisfies InstructionAccesibleEnvironment;
 
         const handlers = compileASTInstructionHandlers(
-            instructionAccesibleVariableEnvironment,
+            instructionAccesibleEnvironment,
             [
-                t.identifier(stateArgument),
-                t.identifier(popArgument),
-                t.identifier(pushArgument),
-                t.identifier(stateIndex1GetterArgument),
-                t.identifier(bigObjectLikeInstancesArgument),
-                t.identifier(stateRelatedFunctionsArgument),
+                t.identifier(stateArg),
+                t.identifier(popArg),
+                t.identifier(pushArg),
+                t.identifier(stateIndex1GetterArg),
+                t.identifier(bigObjectLikeInstancesArg),
+                t.identifier(stateRelatedFunctionsArg),
             ] satisfies Array<t.Identifier>,
         );
 
@@ -289,7 +306,7 @@ export default class InterpreterBuilder {
                 "var",
                 [
                     t.variableDeclarator(
-                        t.identifier(defaultVariableEnvironment.instructionSet),
+                        t.identifier(defaultEnvironment.instructionSetArray),
                         t.arrayExpression(handlers),
                     ),
                 ],
@@ -299,23 +316,23 @@ export default class InterpreterBuilder {
         programNodes.push(
             ...new Template(`
             function {popFunction}(state) {
-                return state.{stateArrProp}[{decodedBytecode}[state.{stateArrProp}[0]++] >> 5];
+                return state.{stateArrayPropKey}[{decodedBytecodeArray}[state.{stateArrayPropKey}[0]++] >> 5];
             }
-            `).compile(defaultVariableEnvironment),
+            `).compile(defaultEnvironment),
         );
 
         // Dispatcher
         programNodes.push(
-            ...regeneratorRuntimeTemplate.compile(defaultVariableEnvironment),
+            ...regeneratorRuntimeTemplate.compile(defaultEnvironment),
             ...this.compileDispatcherAST({
-                ...defaultVariableEnvironment,
+                ...defaultEnvironment,
 
                 callerArgumentsString: callerArguments.join(","),
             }),
             ...new Template(`
             // Run program
             {dispatcherFunction}({vmStateObject})
-            `).compile(defaultVariableEnvironment),
+            `).compile(defaultEnvironment),
         );
 
         const { code } = generate(t.program(
@@ -369,20 +386,20 @@ export default class InterpreterBuilder {
                 for (var bigObjectLikeInstances = [
                     {globalObject}, 
                     [
-                        {promise}, 
-                        {regeneratorRuntime}
+                        {promiseObject}, 
+                        {regeneratorRuntimeObject}
                     ], 
-                    {decodedBytecode}
+                    {decodedBytecodeArray}
                 ], 
                 stateRelatedFunctions = [
                     {bytecodeReturnFunction}, 
                     {exceptionHandlerFunction}, 
                     {vmStateFunction}, 
                     {dispatcherFunction}, 
-                    {randomFuncProp}, 
+                    {randomFuncPropKey}, 
                     {popFunction}
                 ] ; ;) {
-                    var instructionHandler = {instructionSet}[{decodedBytecode}[state.{stateArrProp}[0]++]];
+                    var instructionHandler = {instructionSetArray}[{decodedBytecodeArray}[state.{stateArrayPropKey}[0]++]];
                     try {
                         var returnSignal = instructionHandler({callerArgumentsString});
                         if (returnSignal === null) break;

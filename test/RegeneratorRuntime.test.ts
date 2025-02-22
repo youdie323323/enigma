@@ -1,6 +1,6 @@
 import { executeCode, window } from "./__setup__";
 
-describe("Regenerator tests", () => {
+describe("Regenerator runtime tests", () => {
     describe("Promise tests", () => {
         test("async function should return Promise", async () => {
             await executeCode(`

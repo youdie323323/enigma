@@ -7,7 +7,7 @@ import {
 import RegisterAllocator from './Register/RegisterAllocator';
 import UniqueIdentifier from './CompilerUniqueIdentifier';
 import { Memoize } from './CompilerMemoize';
-import type { IR, IRNumericalData, IRLabel, IROpcode, IRReference, IRStringData } from './CompilerIntermediateRepresentation';
+import type { IR, IRNumericalData, IRLabel, IROpcode, IRReference, IRStringData, OpcodeLike } from './CompilerIntermediateRepresentation';
 import { labelSymbol, referenceSymbol, opcodeSymbol, stringDataSymbol, numericalDataSymbol } from './CompilerIntermediateRepresentation';
 import { createRegister, type Register, registerToNumber } from './Register/Register';
 import { type Bytecode } from '../Interpreter/Builder/Bytecode/Bytecode';
@@ -20,6 +20,7 @@ import {
   FUNCTION_RESULT_REG,
   OperatorCode
 } from './CompilerOperatorCode';
+import { LiteralId } from './CompilerLiteralId';
 
 type ControlBlock = { label?: string; continue?: string; break?: string };
 
@@ -181,9 +182,15 @@ export default class Compiler {
     return { type: referenceSymbol, label } satisfies IRReference;
   }
 
+  /**
+   * Convert opcode/literal id to compiler intermediate representation.
+   * 
+   * @param opcodeLike -
+   * @returns 
+   */
   @Memoize()
-  private createOp(opcode: OperatorCode): IROpcode {
-    return { type: opcodeSymbol, opcode } satisfies IROpcode;
+  private createOp(opcodeLike: OpcodeLike): IROpcode {
+    return { type: opcodeSymbol, opcodeLike } satisfies IROpcode;
   }
 
   // @Memoize()
@@ -214,7 +221,7 @@ export default class Compiler {
           inst.data.push(this.encodeSafeInteger(literal));
         } else {
           inst.data.push(...this.encodeFloat64(literal));
-          asms.push(this.createOp(OperatorCode.Num));
+          asms.push(this.createOp(LiteralId.Num));
         }
 
         asms.push(inst);
@@ -223,13 +230,13 @@ export default class Compiler {
       }
 
       case typeof literal === "boolean": {
-        asms.push(this.createOp(literal ? OperatorCode.True : OperatorCode.False));
+        asms.push(this.createOp(literal ? LiteralId.True : LiteralId.False));
 
         break;
       }
 
       case literal === null: {
-        asms.push(this.createOp(OperatorCode.Null));
+        asms.push(this.createOp(LiteralId.Null));
 
         break;
       }
@@ -1627,7 +1634,7 @@ export default class Compiler {
         }
 
         case opcodeSymbol: {
-          bytecode.push(inst.opcode);
+          bytecode.push(inst.opcodeLike);
 
           break;
         }
@@ -1639,7 +1646,7 @@ export default class Compiler {
         }
 
         case stringDataSymbol: {
-          bytecode.push(OperatorCode.StoreOrLoadStr, stringIndexMap.get(inst.data) ?? joinedStringTable.indexOf(inst.data), inst.data.length);
+          bytecode.push(LiteralId.StoreOrLoadStr, stringIndexMap.get(inst.data) ?? joinedStringTable.indexOf(inst.data), inst.data.length);
 
           break;
         }
@@ -1652,7 +1659,7 @@ export default class Compiler {
     });
 
     // Load string operation
-    bytecode.push(OperatorCode.StoreOrLoadStr);
+    bytecode.push(LiteralId.StoreOrLoadStr);
     const indexAtStringDataLength = bytecode.length - 1;
     bytecode.push(joinedStringTable.length);
     for (const c of joinedStringTable) {

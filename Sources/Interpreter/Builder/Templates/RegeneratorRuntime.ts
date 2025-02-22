@@ -1,7 +1,7 @@
 import Template from "./Template";
 
 export default new Template(`
-var {regeneratorRuntime} =
+var {regeneratorRuntimeObject} =
 
     /**
      * MIT License

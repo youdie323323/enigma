@@ -41,7 +41,7 @@ export default class BytecodeTranscoderProvider {
     private static readonly MAX_RADIX = 50;
 
     private static readonly decoderTemplate = new Template(`
-        var {decoder} = function (encoded, table, radix) {
+        var {decoderFunction} = function (encoded, table, radix) {
             for (var length = table.length, r = length - radix, t = [], i = 0; i < encoded.length;)
                 for (var h = 0, l = 1; ;) {
                     var x = table.indexOf(encoded[i++]);
