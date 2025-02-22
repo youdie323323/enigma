@@ -19,11 +19,11 @@ export const instructionSet = [
         opcode: OperatorCode.Void,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            pushArgument,
+            stateArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, void 0);
+            ${pushArg}(${stateArg}, void 0);
             `)
         },
     },
@@ -31,11 +31,11 @@ export const instructionSet = [
         opcode: OperatorCode.EmptyObject,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            pushArgument,
+            stateArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, {});
+            ${pushArg}(${stateArg}, {});
             `)
         },
     },
@@ -43,11 +43,11 @@ export const instructionSet = [
         opcode: OperatorCode.EmptyArray,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            pushArgument,
+            stateArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, []);
+            ${pushArg}(${stateArg}, []);
             `)
         },
     },
@@ -55,12 +55,12 @@ export const instructionSet = [
         opcode: OperatorCode.NewArray,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, new Array(${popArgument}(${stateArgument})));
+            ${pushArg}(${stateArg}, new Array(${popArg}(${stateArg})));
             `)
         },
     },
@@ -68,12 +68,12 @@ export const instructionSet = [
         opcode: OperatorCode.SetReg,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}));
             `)
         },
     },
@@ -81,12 +81,12 @@ export const instructionSet = [
         opcode: OperatorCode.NewRegExp,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, new RegExp(${popArgument}(${stateArgument}), ${popArgument}(${stateArgument})));
+            ${pushArg}(${stateArg}, new RegExp(${popArg}(${stateArg}), ${popArg}(${stateArg})));
             `)
         },
     },
@@ -94,14 +94,14 @@ export const instructionSet = [
         opcode: OperatorCode.SetVoid,
         requiredArgs: 4,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            stateIndex1GetterArgument,
+            stateArg,
+            popArg,
+            stateIndex1GetterArg,
             
             memoryProp,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${stateIndex1GetterArgument}(${stateArgument}).${memoryProp}[${popArgument}(${stateArgument})] = void 0
+            ${stateIndex1GetterArg}(${stateArg}).${memoryProp}[${popArg}(${stateArg})] = void 0
             `)
         },
     },
@@ -109,14 +109,14 @@ export const instructionSet = [
         opcode: OperatorCode.SetValue,
         requiredArgs: 4,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            stateIndex1GetterArgument,
+            stateArg,
+            popArg,
+            stateIndex1GetterArg,
             
             memoryProp,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${stateIndex1GetterArgument}(${stateArgument}).${memoryProp}[${popArgument}(${stateArgument})] = ${popArgument}(${stateArgument})
+            ${stateIndex1GetterArg}(${stateArg}).${memoryProp}[${popArg}(${stateArg})] = ${popArg}(${stateArg})
             `)
         },
     },
@@ -124,18 +124,18 @@ export const instructionSet = [
         opcode: OperatorCode.Load,
         requiredArgs: 4,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
-            stateIndex1GetterArgument,
+            stateArg,
+            popArg,
+            pushArg,
+            stateIndex1GetterArg,
             
             memoryProp,
             parentMemoryStorerProp,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            for (var $varName = ${popArgument}(${stateArgument}), $currentState = ${stateIndex1GetterArgument}(${stateArgument}); $currentState; $currentState = $currentState.${parentMemoryStorerProp}) 
+            for (var $varName = ${popArg}(${stateArg}), $currentState = ${stateIndex1GetterArg}(${stateArg}); $currentState; $currentState = $currentState.${parentMemoryStorerProp}) 
               if ($varName in $currentState.${memoryProp}) {
-                ${pushArgument}(${stateArgument}, $currentState.${memoryProp}[$varName])
+                ${pushArg}(${stateArg}, $currentState.${memoryProp}[$varName])
                 return;
               } 
             throw 'ball';
@@ -146,15 +146,15 @@ export const instructionSet = [
         opcode: OperatorCode.Out,
         requiredArgs: 4,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            stateIndex1GetterArgument,
+            stateArg,
+            popArg,
+            stateIndex1GetterArg,
             
             memoryProp,
             parentMemoryStorerProp,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            for (var $varName = ${popArgument}(${stateArgument}), $value = ${popArgument}(${stateArgument}), $currentState = ${stateIndex1GetterArgument}(${stateArgument}); $currentState; $currentState = $currentState.${parentMemoryStorerProp}) 
+            for (var $varName = ${popArg}(${stateArg}), $value = ${popArg}(${stateArg}), $currentState = ${stateIndex1GetterArg}(${stateArg}); $currentState; $currentState = $currentState.${parentMemoryStorerProp}) 
               if ($varName in $currentState.${memoryProp}) {
                 $currentState.${memoryProp}[$varName] = $value
                 return;
@@ -167,17 +167,17 @@ export const instructionSet = [
         opcode: OperatorCode.InheritCaller,
         requiredArgs: 4,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            stateIndex1GetterArgument,
+            stateArg,
+            popArg,
+            stateIndex1GetterArg,
             
             memoryProp,
             callerProp,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $id = ${popArgument}(${stateArgument}),
-              $currentState = ${stateIndex1GetterArgument}(${stateArgument}),
-              $callerFunc = ${stateArgument}.${callerProp};
+            var $id = ${popArg}(${stateArg}),
+              $currentState = ${stateIndex1GetterArg}(${stateArg}),
+              $callerFunc = ${stateArg}.${callerProp};
             $currentState.${memoryProp}[$id] = $callerFunc;
             `);
         },
@@ -186,13 +186,13 @@ export const instructionSet = [
         opcode: OperatorCode.Jump,
         requiredArgs: 2,
         templateFn: function ({
-            stateArgument,
-            popArgument,
+            stateArg,
+            popArg,
             
             stateArrProp,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${stateArgument}.${stateArrProp}[0] = ${popArgument}(${stateArgument})
+            ${stateArg}.${stateArrProp}[0] = ${popArg}(${stateArg})
             `)
         },
     },
@@ -200,14 +200,14 @@ export const instructionSet = [
         opcode: OperatorCode.JumpIfTrue,
         requiredArgs: 2,
         templateFn: function ({
-            stateArgument,
-            popArgument,
+            stateArg,
+            popArg,
             
             stateArrProp,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $address = ${popArgument}(${stateArgument});
-            ${popArgument}(${stateArgument}) ? ${stateArgument}.${stateArrProp}[0] = $address : $address
+            var $address = ${popArg}(${stateArg});
+            ${popArg}(${stateArg}) ? ${stateArg}.${stateArrProp}[0] = $address : $address
             `)
         },
     },
@@ -215,14 +215,14 @@ export const instructionSet = [
         opcode: OperatorCode.JumpIfFalse,
         requiredArgs: 2,
         templateFn: function ({
-            stateArgument,
-            popArgument,
+            stateArg,
+            popArg,
             
             stateArrProp,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $address = ${popArgument}(${stateArgument});
-            ${popArgument}(${stateArgument}) ? $address : ${stateArgument}.${stateArrProp}[0] = $address
+            var $address = ${popArg}(${stateArg});
+            ${popArg}(${stateArg}) ? $address : ${stateArg}.${stateArrProp}[0] = $address
             `)
         },
     },
@@ -230,11 +230,11 @@ export const instructionSet = [
         opcode: OperatorCode.Func,
         requiredArgs: 7,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
-            stateRelatedFunctionsArgument,
-            stateIndex1GetterArgument,
+            stateArg,
+            popArg,
+            pushArg,
+            stateRelatedFunctionsArg,
+            stateIndex1GetterArg,
 
             stateArrProp,
             randomFuncPropAddr,
@@ -245,13 +245,13 @@ export const instructionSet = [
             currentThisProp,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $address = ${popArgument}(${stateArgument}), 
-                $length = ${popArgument}(${stateArgument}),
-                $funcName = ${popArgument}(${stateArgument}),
-                $parentState = ${stateIndex1GetterArgument}(${stateArgument}),
-                $stateFunction = ${stateRelatedFunctionsArgument}[2],
-                $dispatchHandler = ${stateRelatedFunctionsArgument}[3],
-                $randomProp = ${stateRelatedFunctionsArgument}[4],
+            var $address = ${popArg}(${stateArg}), 
+                $length = ${popArg}(${stateArg}),
+                $funcName = ${popArg}(${stateArg}),
+                $parentState = ${stateIndex1GetterArg}(${stateArg}),
+                $stateFunction = ${stateRelatedFunctionsArg}[2],
+                $dispatchHandler = ${stateRelatedFunctionsArg}[3],
+                $randomProp = ${stateRelatedFunctionsArg}[4],
                 $targetFunc = function() {
                   var $funcState = $stateFunction();
                   $funcState.${stateArrProp}[${ARGUMENTS_REG}] = arguments;
@@ -280,7 +280,7 @@ export const instructionSet = [
               ${randomFuncPropAddr}: $address,
               ${parentMemoryStorerProp}: $parentState,
               ${randomFuncPropFunc}: $targetFunc
-            }, ${pushArgument}(${stateArgument}, $targetFunc)
+            }, ${pushArg}(${stateArg}, $targetFunc)
             `)
         },
     },
@@ -288,9 +288,9 @@ export const instructionSet = [
         opcode: OperatorCode.Call,
         requiredArgs: 7,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            stateRelatedFunctionsArgument,
+            stateArg,
+            popArg,
+            stateRelatedFunctionsArg,
 
             stateArrProp,
             randomFuncPropAddr,
@@ -301,22 +301,22 @@ export const instructionSet = [
             currentThisProp,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $callArgs = ${popArgument}(${stateArgument}),
-              $targetFunc = ${popArgument}(${stateArgument}),
-              $thisContext = ${popArgument}(${stateArgument}),
-              $randomFuncProp = ${stateRelatedFunctionsArgument}[4];
+            var $callArgs = ${popArg}(${stateArg}),
+              $targetFunc = ${popArg}(${stateArg}),
+              $thisContext = ${popArg}(${stateArg}),
+              $randomFuncProp = ${stateRelatedFunctionsArg}[4];
             if ($targetFunc[$randomFuncProp] && $targetFunc[$randomFuncProp].${randomFuncPropFunc} === $targetFunc) {
-              ${stateArgument}.${stateArrProp} = [$targetFunc[$randomFuncProp].${randomFuncPropAddr}, {
+              ${stateArg}.${stateArrProp} = [$targetFunc[$randomFuncProp].${randomFuncPropAddr}, {
                 ${currentThisProp}: $thisContext,
                 ${callerProp}: $targetFunc,
-                ${stateArrProp}: ${stateArgument}.${stateArrProp},
+                ${stateArrProp}: ${stateArg}.${stateArrProp},
                 ${memoryProp}: [],
                 ${parentMemoryStorerProp}: $targetFunc[$randomFuncProp].${parentMemoryStorerProp},
               }, void 0, function() {
                 return arguments
               }.apply(void 0, $callArgs)];
-              for (var $argIndex = 0; $argIndex < $callArgs.length; $argIndex++) ${stateArgument}.${stateArrProp}.push($callArgs[$argIndex]);
-            } else ${stateArgument}.${stateArrProp}[${FUNCTION_RESULT_REG}] = $targetFunc.apply($thisContext, $callArgs)
+              for (var $argIndex = 0; $argIndex < $callArgs.length; $argIndex++) ${stateArg}.${stateArrProp}.push($callArgs[$argIndex]);
+            } else ${stateArg}.${stateArrProp}[${FUNCTION_RESULT_REG}] = $targetFunc.apply($thisContext, $callArgs)
             `)
         },
     },
@@ -324,14 +324,14 @@ export const instructionSet = [
         opcode: OperatorCode.New,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $targetFunc = ${popArgument}(${stateArgument}),
-              $argArray = ${popArgument}(${stateArgument}).slice();
-            $argArray.unshift(void 0), ${pushArgument}(${stateArgument}, new (Function.bind.apply($targetFunc, $argArray)));
+            var $targetFunc = ${popArg}(${stateArg}),
+              $argArray = ${popArg}(${stateArg}).slice();
+            $argArray.unshift(void 0), ${pushArg}(${stateArg}, new (Function.bind.apply($targetFunc, $argArray)));
             `)
         },
     },
@@ -346,12 +346,12 @@ export const instructionSet = [
         opcode: OperatorCode.Get,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument})[${popArgument}(${stateArgument})]);
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg})[${popArg}(${stateArg})]);
             `)
         },
     },
@@ -359,11 +359,11 @@ export const instructionSet = [
         opcode: OperatorCode.Put,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
+            stateArg,
+            popArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${popArgument}(${stateArgument})[${popArgument}(${stateArgument})] = ${popArgument}(${stateArgument})
+            ${popArg}(${stateArg})[${popArg}(${stateArg})] = ${popArg}(${stateArg})
             `)
         },
     },
@@ -371,12 +371,12 @@ export const instructionSet = [
         opcode: OperatorCode.In,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) in ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) in ${popArg}(${stateArg}));
             `)
         },
     },
@@ -384,14 +384,14 @@ export const instructionSet = [
         opcode: OperatorCode.Delete,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $targetObj = ${popArgument}(${stateArgument}),
-                $propertyKey = ${popArgument}(${stateArgument});
-            ${pushArgument}(${stateArgument}, delete $targetObj[$propertyKey]);
+            var $targetObj = ${popArg}(${stateArg}),
+                $propertyKey = ${popArg}(${stateArg});
+            ${pushArg}(${stateArg}, delete $targetObj[$propertyKey]);
             `)
         },
     },
@@ -399,12 +399,12 @@ export const instructionSet = [
         opcode: OperatorCode.Eq,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) == ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) == ${popArg}(${stateArg}));
             `)
         },
     },
@@ -412,12 +412,12 @@ export const instructionSet = [
         opcode: OperatorCode.Neq,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) != ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) != ${popArg}(${stateArg}));
             `)
         },
     },
@@ -425,12 +425,12 @@ export const instructionSet = [
         opcode: OperatorCode.Seq,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) === ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) === ${popArg}(${stateArg}));
             `)
         },
     },
@@ -438,12 +438,12 @@ export const instructionSet = [
         opcode: OperatorCode.SNeq,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) !== ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) !== ${popArg}(${stateArg}));
             `)
         },
     },
@@ -451,12 +451,12 @@ export const instructionSet = [
         opcode: OperatorCode.Lt,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) < ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) < ${popArg}(${stateArg}));
             `)
         },
     },
@@ -464,12 +464,12 @@ export const instructionSet = [
         opcode: OperatorCode.Lte,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) <= ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) <= ${popArg}(${stateArg}));
             `)
         },
     },
@@ -477,12 +477,12 @@ export const instructionSet = [
         opcode: OperatorCode.Gt,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) > ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) > ${popArg}(${stateArg}));
             `)
         },
     },
@@ -490,12 +490,12 @@ export const instructionSet = [
         opcode: OperatorCode.Gte,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) >= ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) >= ${popArg}(${stateArg}));
             `)
         },
     },
@@ -503,12 +503,12 @@ export const instructionSet = [
         opcode: OperatorCode.Add,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) + ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) + ${popArg}(${stateArg}));
             `)
         },
     },
@@ -516,12 +516,12 @@ export const instructionSet = [
         opcode: OperatorCode.Sub,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) - ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) - ${popArg}(${stateArg}));
             `)
         },
     },
@@ -529,12 +529,12 @@ export const instructionSet = [
         opcode: OperatorCode.Mul,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) * ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) * ${popArg}(${stateArg}));
             `)
         },
     },
@@ -542,12 +542,12 @@ export const instructionSet = [
         opcode: OperatorCode.Div,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) / ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) / ${popArg}(${stateArg}));
             `)
         },
     },
@@ -555,12 +555,12 @@ export const instructionSet = [
         opcode: OperatorCode.Mod,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) % ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) % ${popArg}(${stateArg}));
             `)
         },
     },
@@ -568,12 +568,12 @@ export const instructionSet = [
         opcode: OperatorCode.BNot,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ~${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ~${popArg}(${stateArg}));
             `)
         },
     },
@@ -581,12 +581,12 @@ export const instructionSet = [
         opcode: OperatorCode.BOr,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) | ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) | ${popArg}(${stateArg}));
             `)
         },
     },
@@ -594,12 +594,12 @@ export const instructionSet = [
         opcode: OperatorCode.BXor,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) ^ ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) ^ ${popArg}(${stateArg}));
             `)
         },
     },
@@ -607,12 +607,12 @@ export const instructionSet = [
         opcode: OperatorCode.BAnd,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) & ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) & ${popArg}(${stateArg}));
             `)
         },
     },
@@ -620,12 +620,12 @@ export const instructionSet = [
         opcode: OperatorCode.LShift,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) << ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) << ${popArg}(${stateArg}));
             `)
         },
     },
@@ -633,12 +633,12 @@ export const instructionSet = [
         opcode: OperatorCode.RShift,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) >> ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) >> ${popArg}(${stateArg}));
             `)
         },
     },
@@ -646,12 +646,12 @@ export const instructionSet = [
         opcode: OperatorCode.UrShift,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) >>> ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) >>> ${popArg}(${stateArg}));
             `)
         },
     },
@@ -659,12 +659,12 @@ export const instructionSet = [
         opcode: OperatorCode.Not,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, !${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, !${popArg}(${stateArg}));
             `)
         },
     },
@@ -672,12 +672,12 @@ export const instructionSet = [
         opcode: OperatorCode.InstanceOf,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${popArgument}(${stateArgument}) instanceof ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, ${popArg}(${stateArg}) instanceof ${popArg}(${stateArg}));
             `)
         },
     },
@@ -685,12 +685,12 @@ export const instructionSet = [
         opcode: OperatorCode.TypeOf,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, typeof ${popArgument}(${stateArgument}));
+            ${pushArg}(${stateArg}, typeof ${popArg}(${stateArg}));
             `)
         },
     },
@@ -698,14 +698,14 @@ export const instructionSet = [
         opcode: OperatorCode.GetWindowProp,
         requiredArgs: 6,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
-            bigObjectLikeInstancesArgument,
+            stateArg,
+            popArg,
+            pushArg,
+            bigObjectLikeInstancesArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $global = ${bigObjectLikeInstancesArgument}[0];
-            ${pushArgument}(${stateArgument}, $global[${popArgument}(${stateArgument})]);
+            var $global = ${bigObjectLikeInstancesArg}[0];
+            ${pushArg}(${stateArg}, $global[${popArg}(${stateArg})]);
             `)
         },
     },
@@ -713,15 +713,15 @@ export const instructionSet = [
         opcode: OperatorCode.SetCatchAddr,
         requiredArgs: 2,
         templateFn: function ({
-            stateArgument,
-            popArgument,
+            stateArg,
+            popArg,
 
             catchAddrProp,
             stateArrProp,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $address = ${popArgument}(${stateArgument});
-            ${stateArgument}.${stateArrProp}[1].${catchAddrProp} = $address;
+            var $address = ${popArg}(${stateArg});
+            ${stateArg}.${stateArrProp}[1].${catchAddrProp} = $address;
             `)
         },
     },
@@ -729,15 +729,15 @@ export const instructionSet = [
         opcode: OperatorCode.SetFinallyAddr,
         requiredArgs: 2,
         templateFn: function ({
-            stateArgument,
-            popArgument,
+            stateArg,
+            popArg,
 
             finallyAddressProp,
             stateArrProp,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $address = ${popArgument}(${stateArgument});
-            ${stateArgument}.${stateArrProp}[1].${finallyAddressProp} = $address;
+            var $address = ${popArg}(${stateArg});
+            ${stateArg}.${stateArrProp}[1].${finallyAddressProp} = $address;
             `)
         },
     },
@@ -745,20 +745,20 @@ export const instructionSet = [
         opcode: OperatorCode.ThrowErrorOrDoFinally,
         requiredArgs: 7,
         templateFn: function ({
-            stateArgument,
-            stateIndex1GetterArgument,
+            stateArg,
+            stateIndex1GetterArg,
 
             errorObjectProp,
             funcResultStorerProp,
             anyObjectPropSubprop,
-            stateRelatedFunctionsArgument,
+            stateRelatedFunctionsArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $bytecodeReturn = ${stateRelatedFunctionsArgument}[0]
-              , $exceptionHandler = ${stateRelatedFunctionsArgument}[1];
-            if (${stateArgument}.${errorObjectProp}) $exceptionHandler(${stateArgument}, ${stateArgument}.${errorObjectProp}.${anyObjectPropSubprop}); else {
-              var $state = ${stateIndex1GetterArgument}(${stateArgument});
-              return $state != null && $state.${funcResultStorerProp} && $bytecodeReturn(${stateArgument}, $state.${funcResultStorerProp}.${anyObjectPropSubprop})
+            var $bytecodeReturn = ${stateRelatedFunctionsArg}[0]
+              , $exceptionHandler = ${stateRelatedFunctionsArg}[1];
+            if (${stateArg}.${errorObjectProp}) $exceptionHandler(${stateArg}, ${stateArg}.${errorObjectProp}.${anyObjectPropSubprop}); else {
+              var $state = ${stateIndex1GetterArg}(${stateArg});
+              return $state != null && $state.${funcResultStorerProp} && $bytecodeReturn(${stateArg}, $state.${funcResultStorerProp}.${anyObjectPropSubprop})
             }
             `)
         },
@@ -767,15 +767,15 @@ export const instructionSet = [
         opcode: OperatorCode.ThrowError,
         requiredArgs: 7,
         templateFn: function ({
-            stateArgument,
-            popArgument,
+            stateArg,
+            popArg,
 
-            stateRelatedFunctionsArgument,
+            stateRelatedFunctionsArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $exceptionHandler = ${stateRelatedFunctionsArgument}[1]
-              , $error = ${popArgument}(${stateArgument});
-            $exceptionHandler(${stateArgument}, $error)
+            var $exceptionHandler = ${stateRelatedFunctionsArg}[1]
+              , $error = ${popArg}(${stateArg});
+            $exceptionHandler(${stateArg}, $error)
             `)
         },
     },
@@ -783,14 +783,14 @@ export const instructionSet = [
         opcode: OperatorCode.PushError,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            pushArgument,
+            stateArg,
+            pushArg,
 
             errorObjectProp,
             anyObjectPropSubprop,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${stateArgument}.${errorObjectProp} && ${stateArgument}.${errorObjectProp}.${anyObjectPropSubprop});
+            ${pushArg}(${stateArg}, ${stateArg}.${errorObjectProp} && ${stateArg}.${errorObjectProp}.${anyObjectPropSubprop});
             `)
         },
     },
@@ -798,12 +798,12 @@ export const instructionSet = [
         opcode: OperatorCode.VoidError,
         requiredArgs: 1,
         templateFn: function ({
-            stateArgument,
+            stateArg,
 
             errorObjectProp,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${stateArgument}.${errorObjectProp} = void 0;
+            ${stateArg}.${errorObjectProp} = void 0;
             `)
         },
     },
@@ -811,14 +811,14 @@ export const instructionSet = [
         opcode: OperatorCode.GetCurrentThis,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            pushArgument,
+            stateArg,
+            pushArg,
 
             stateArrProp,
             currentThisProp,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            ${pushArgument}(${stateArgument}, ${stateArgument}.${stateArrProp}[1].${currentThisProp});
+            ${pushArg}(${stateArg}, ${stateArg}.${stateArrProp}[1].${currentThisProp});
             `)
         },
     },
@@ -826,14 +826,14 @@ export const instructionSet = [
         opcode: OperatorCode.ReturnValue,
         requiredArgs: 7,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            stateRelatedFunctionsArgument,
+            stateArg,
+            popArg,
+            stateRelatedFunctionsArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $bytecodeReturn = ${stateRelatedFunctionsArgument}[0],
-                $value = ${popArgument}(${stateArgument});
-            return $bytecodeReturn(${stateArgument}, $value);
+            var $bytecodeReturn = ${stateRelatedFunctionsArg}[0],
+                $value = ${popArg}(${stateArg});
+            return $bytecodeReturn(${stateArg}, $value);
             `)
         },
     },
@@ -841,12 +841,12 @@ export const instructionSet = [
         opcode: OperatorCode.ReturnVoid,
         requiredArgs: 7,
         templateFn: function ({
-            stateArgument,
-            stateRelatedFunctionsArgument,
+            stateArg,
+            stateRelatedFunctionsArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $bytecodeReturn = ${stateRelatedFunctionsArgument}[0];
-            return $bytecodeReturn(${stateArgument}, void 0);
+            var $bytecodeReturn = ${stateRelatedFunctionsArg}[0];
+            return $bytecodeReturn(${stateArg}, void 0);
             `)
         },
     },
@@ -854,15 +854,15 @@ export const instructionSet = [
         opcode: OperatorCode.ForIn,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $object = ${popArgument}(${stateArgument})
+            var $object = ${popArg}(${stateArg})
               , $items = [];
             for (var item in $object) $items.push(item);
-            ${pushArgument}(${stateArgument}, $items);
+            ${pushArg}(${stateArg}, $items);
             `)
         },
     },
@@ -870,27 +870,27 @@ export const instructionSet = [
         opcode: OperatorCode.Promise,
         requiredArgs: 6,
         templateFn: function ({
-            stateArgument,
-            pushArgument,
-            bigObjectLikeInstancesArgument,
+            stateArg,
+            pushArg,
+            bigObjectLikeInstancesArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $asyncCommon = ${bigObjectLikeInstancesArgument}[1];
-            ${pushArgument}(${stateArgument}, $asyncCommon[0]);
+            var $asyncCommon = ${bigObjectLikeInstancesArg}[1];
+            ${pushArg}(${stateArg}, $asyncCommon[0]);
             `)
         },
     },
     {
-        opcode: OperatorCode.Regenerator,
+        opcode: OperatorCode.RegeneratorRuntime,
         requiredArgs: 6,
         templateFn: function ({
-            stateArgument,
-            pushArgument,
-            bigObjectLikeInstancesArgument,
+            stateArg,
+            pushArg,
+            bigObjectLikeInstancesArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $asyncCommon = ${bigObjectLikeInstancesArgument}[1];
-            ${pushArgument}(${stateArgument}, $asyncCommon[1]);
+            var $asyncCommon = ${bigObjectLikeInstancesArg}[1];
+            ${pushArg}(${stateArg}, $asyncCommon[1]);
             `)
         },
     },
@@ -898,13 +898,13 @@ export const instructionSet = [
         opcode: OperatorCode.CallFunction0Arg,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $func = ${popArgument}(${stateArgument});
-            ${pushArgument}(${stateArgument}, $func());
+            var $func = ${popArg}(${stateArg});
+            ${pushArg}(${stateArg}, $func());
             `)
         },
     },
@@ -912,14 +912,14 @@ export const instructionSet = [
         opcode: OperatorCode.CallFunction1Arg,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $func = ${popArgument}(${stateArgument}),
-                $arg1 = ${popArgument}(${stateArgument});
-            ${pushArgument}(${stateArgument}, $func($arg1));
+            var $func = ${popArg}(${stateArg}),
+                $arg1 = ${popArg}(${stateArg});
+            ${pushArg}(${stateArg}, $func($arg1));
             `)
         },
     },
@@ -927,15 +927,15 @@ export const instructionSet = [
         opcode: OperatorCode.CallFunction2Arg,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $func = ${popArgument}(${stateArgument}),
-                $arg1 = ${popArgument}(${stateArgument}),
-                $arg2 = ${popArgument}(${stateArgument});
-            ${pushArgument}(${stateArgument}, $func($arg1, $arg2));
+            var $func = ${popArg}(${stateArg}),
+                $arg1 = ${popArg}(${stateArg}),
+                $arg2 = ${popArg}(${stateArg});
+            ${pushArg}(${stateArg}, $func($arg1, $arg2));
             `)
         },
     },
@@ -943,16 +943,16 @@ export const instructionSet = [
         opcode: OperatorCode.CallFunction3Arg,
         requiredArgs: 3,
         templateFn: function ({
-            stateArgument,
-            popArgument,
-            pushArgument,
+            stateArg,
+            popArg,
+            pushArg,
         }: InstructionAccesibleVariableEnvironment): Template {
             return new Template(`
-            var $func = ${popArgument}(${stateArgument}),
-                $arg1 = ${popArgument}(${stateArgument}),
-                $arg2 = ${popArgument}(${stateArgument}),
-                $arg3 = ${popArgument}(${stateArgument});
-            ${pushArgument}(${stateArgument}, $func($arg1, $arg2, $arg3));
+            var $func = ${popArg}(${stateArg}),
+                $arg1 = ${popArg}(${stateArg}),
+                $arg2 = ${popArg}(${stateArg}),
+                $arg3 = ${popArg}(${stateArg});
+            ${pushArg}(${stateArg}, $func($arg1, $arg2, $arg3));
             `);
         },
     },

@@ -10,7 +10,7 @@ import unraw from "unraw";
 import { type Bytecode } from "./Bytecode/Bytecode";
 import { OperatorCode, FUNCTION_RESULT_REG } from "../../Compiler/CompilerOperatorCode";
 import { InterpreterDefaultVariableEnvironment } from "./InterpreterDefaultVariableEnvironment";
-import { InstructionAccesibleVariableEnvironment, InstructionVariableEnvironment } from "../../Instruction/InstructionAccesibleVariableEnvironment";
+import { InstructionAccesibleVariableEnvironment, InstructionArgumentEnvironment } from "../../Instruction/InstructionAccesibleVariableEnvironment";
 
 const LICENSE_PATTERN = /(?:^[!@]|^@(?:preserve|license|copyright)|^\s*(?:MIT|MPL|GPL|LGPL|BSD|ISC|Apache|UNLICENSED)\b|\([Cc]\)|[Ll]icen[cs]e|[Cc]opyright|\u00A9)/m;
 
@@ -263,13 +263,13 @@ export default class InterpreterBuilder {
         const instructionAccesibleVariableEnvironment = Object.assign(
             defaultVariableEnvironment,
             {
-                stateArgument,
-                popArgument,
-                pushArgument,
-                stateIndex1GetterArgument,
-                bigObjectLikeInstancesArgument,
-                stateRelatedFunctionsArgument,
-            } satisfies InstructionVariableEnvironment,
+                stateArg: stateArgument,
+                popArg: popArgument,
+                pushArg: pushArgument,
+                stateIndex1GetterArg: stateIndex1GetterArgument,
+                bigObjectLikeInstancesArg: bigObjectLikeInstancesArgument,
+                stateRelatedFunctionsArg: stateRelatedFunctionsArgument,
+            } satisfies InstructionArgumentEnvironment,
         ) satisfies InstructionAccesibleVariableEnvironment;
 
         const handlers = compileASTInstructionHandlers(

@@ -7,7 +7,7 @@ export const NUM_OP_CODES = 61 + 1;
 const availableID = shuffle(Array.from({ length: NUM_OP_CODES }, (_, i) => i));
 
 let currentIdIndex = 0;
-function getRandomId() {
+function nextRandomOpcode() {
   if (currentIdIndex >= availableID.length) {
     throw new Error("No more unique IDs available");
   }
@@ -56,91 +56,91 @@ export enum OperatorCode {
   FakePlaceholder = nextLiteralId(),
 
   // Binary operators
-  Add = getRandomId(),
-  Sub = getRandomId(),
-  Div = getRandomId(),
-  // EXP = getRandomId(),
-  Mod = getRandomId(),
-  Mul = getRandomId(),
-  UrShift = getRandomId(),
-  RShift = getRandomId(),
-  LShift = getRandomId(),
-  Gte = getRandomId(),
-  Gt = getRandomId(),
-  Lte = getRandomId(),
-  Lt = getRandomId(),
-  Seq = getRandomId(),
-  Eq = getRandomId(),
-  SNeq = getRandomId(),
-  Neq = getRandomId(),
-  In = getRandomId(),
-  InstanceOf = getRandomId(),
+  Add = nextRandomOpcode(),
+  Sub = nextRandomOpcode(),
+  Div = nextRandomOpcode(),
+  // EXP = nextRandomOpcode(),
+  Mod = nextRandomOpcode(),
+  Mul = nextRandomOpcode(),
+  UrShift = nextRandomOpcode(),
+  RShift = nextRandomOpcode(),
+  LShift = nextRandomOpcode(),
+  Gte = nextRandomOpcode(),
+  Gt = nextRandomOpcode(),
+  Lte = nextRandomOpcode(),
+  Lt = nextRandomOpcode(),
+  Seq = nextRandomOpcode(),
+  Eq = nextRandomOpcode(),
+  SNeq = nextRandomOpcode(),
+  Neq = nextRandomOpcode(),
+  In = nextRandomOpcode(),
+  InstanceOf = nextRandomOpcode(),
 
   // Object operators
-  EmptyObject = getRandomId(),
-  Get = getRandomId(),
-  Put = getRandomId(),
-  GetWindowProp = getRandomId(),
-  EmptyArray = getRandomId(),
-  NewArray = getRandomId(),
+  EmptyObject = nextRandomOpcode(),
+  Get = nextRandomOpcode(),
+  Put = nextRandomOpcode(),
+  GetWindowProp = nextRandomOpcode(),
+  EmptyArray = nextRandomOpcode(),
+  NewArray = nextRandomOpcode(),
 
   // Varible operators
-  SetVoid = getRandomId(),
-  SetValue = getRandomId(),
-  Out = getRandomId(),
-  Load = getRandomId(),
+  SetVoid = nextRandomOpcode(),
+  SetValue = nextRandomOpcode(),
+  Out = nextRandomOpcode(),
+  Load = nextRandomOpcode(),
 
-  Promise = getRandomId(),
-  Regenerator = getRandomId(),
+  Promise = nextRandomOpcode(),
+  RegeneratorRuntime = nextRandomOpcode(),
 
-  SetReg = getRandomId(),
+  SetReg = nextRandomOpcode(),
 
   // Bit operators
-  BAnd = getRandomId(),
-  BOr = getRandomId(),
-  BXor = getRandomId(),
+  BAnd = nextRandomOpcode(),
+  BOr = nextRandomOpcode(),
+  BXor = nextRandomOpcode(),
 
   // Unary operators
-  BNot = getRandomId(),
-  Not = getRandomId(),
-  Void = getRandomId(),
-  TypeOf = getRandomId(),
-  Delete = getRandomId(),
+  BNot = nextRandomOpcode(),
+  Not = nextRandomOpcode(),
+  Void = nextRandomOpcode(),
+  TypeOf = nextRandomOpcode(),
+  Delete = nextRandomOpcode(),
 
   // Regexp operators
-  NewRegExp = getRandomId(),
+  NewRegExp = nextRandomOpcode(),
 
   // Call operators
-  Call = getRandomId(),
-  New = getRandomId(),
-  CallFunction0Arg = getRandomId(),
-  CallFunction1Arg = getRandomId(),
-  CallFunction2Arg = getRandomId(),
-  CallFunction3Arg = getRandomId(),
+  Call = nextRandomOpcode(),
+  New = nextRandomOpcode(),
+  CallFunction0Arg = nextRandomOpcode(),
+  CallFunction1Arg = nextRandomOpcode(),
+  CallFunction2Arg = nextRandomOpcode(),
+  CallFunction3Arg = nextRandomOpcode(),
 
   // Loop operators
-  ForIn = getRandomId(),
+  ForIn = nextRandomOpcode(),
 
   // Try operators
-  SetCatchAddr = getRandomId(),
-  SetFinallyAddr = getRandomId(),
-  ThrowErrorOrDoFinally = getRandomId(),
-  PushError = getRandomId(),
-  VoidError = getRandomId(),
-  ThrowError = getRandomId(),
+  SetCatchAddr = nextRandomOpcode(),
+  SetFinallyAddr = nextRandomOpcode(),
+  ThrowErrorOrDoFinally = nextRandomOpcode(),
+  PushError = nextRandomOpcode(),
+  VoidError = nextRandomOpcode(),
+  ThrowError = nextRandomOpcode(),
 
   // Function operators
-  Term = getRandomId(),
-  ReturnValue = getRandomId(),
-  ReturnVoid = getRandomId(),
-  Func = getRandomId(),
-  GetCurrentThis = getRandomId(),
-  InheritCaller = getRandomId(),
+  Term = nextRandomOpcode(),
+  ReturnValue = nextRandomOpcode(),
+  ReturnVoid = nextRandomOpcode(),
+  Func = nextRandomOpcode(),
+  GetCurrentThis = nextRandomOpcode(),
+  InheritCaller = nextRandomOpcode(),
 
   // Jump operators
-  Jump = getRandomId(),
-  JumpIfTrue = getRandomId(),
-  JumpIfFalse = getRandomId(),
+  Jump = nextRandomOpcode(),
+  JumpIfTrue = nextRandomOpcode(),
+  JumpIfFalse = nextRandomOpcode(),
 }
 
 type FiniteLikeCallOperatorArgumentCount = 0 | 1 | 2 | 3;

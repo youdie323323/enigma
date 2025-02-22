@@ -823,7 +823,7 @@ export default class Compiler {
           case REGENERATOR_RUNTIME_FUNCTION_IDENTIFIER: {
             const reg = this.registerAllocator.next();
 
-            this.writeInstructions(this.createOp(OperatorCode.Regenerator), this.createRegId(reg));
+            this.writeInstructions(this.createOp(OperatorCode.RegeneratorRuntime), this.createRegId(reg));
 
             return reg;
           }
