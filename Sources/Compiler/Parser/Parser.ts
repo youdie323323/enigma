@@ -200,7 +200,7 @@ export default class Parser {
       switch (true) {
         case t.isProgram(node): {
           node.declarations = new Set();
-          node.label = 'main_' + this.uniqueId.get().toString(16);
+          node.label = 'main_' + this.uniqueId.next().toString(16);
 
           blocks.push(node);
 
@@ -208,10 +208,10 @@ export default class Parser {
         }
 
         case t.isFunctionExpression(node): {
-          if (node.id) node.functionId = this.uniqueId.get();
+          if (node.id) node.functionId = this.uniqueId.next();
 
           node.declarations = new Set();
-          node.label = `${(node.id?.name || 'anonymous')}_${this.uniqueId.get().toString(16)}`;
+          node.label = `${(node.id?.name || 'anonymous')}_${this.uniqueId.next().toString(16)}`;
 
           blocks.push(node);
 
@@ -222,7 +222,7 @@ export default class Parser {
           parentScopeNode.declarations.add(node.id.name);
 
           node.declarations = new Set();
-          node.label = `${(node.id?.name || 'anonymous')}_${this.uniqueId.get().toString(16)}`;
+          node.label = `${(node.id?.name || 'anonymous')}_${this.uniqueId.next().toString(16)}`;
 
           blocks.push(node);
 

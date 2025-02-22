@@ -5,7 +5,7 @@ export default class UniqueIdentifier {
         this.nextId = 0;
     }
 
-    public get(): number {
+    public next(): number {
         return ++this.nextId;
     }
 }

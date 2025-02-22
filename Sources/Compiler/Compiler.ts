@@ -165,11 +165,11 @@ export default class Compiler {
 
     this.memoryDictionary = new Map<string, number>();
     // Add dictionary
-    this.memoryDictionary.set("GLOBAL", this.uniqueId.get());
+    this.memoryDictionary.set("GLOBAL", this.uniqueId.next());
   }
 
   private createLabelName(): string {
-    return String(this.uniqueId.get());
+    return String(this.uniqueId.next());
   }
 
   @Memoize()
@@ -248,11 +248,24 @@ export default class Compiler {
   }
 
   /**
-   * Write asm to instructions.
+   * Write label only.
    */
-  private writeInstructions(...asms: Array<IR>): void {
-    this.instructions.push(...asms);
-  };
+  private writeInstruction(label: IRLabel): void;
+  /**
+   * Write operand only.
+   */
+  private writeInstruction(operand: IR): void;
+  /**
+   * Write instruction into instructions.
+   */
+  private writeInstruction(opcode: OperatorCode, ...operands: Array<IR>): void;
+  private writeInstruction(arg0: IRLabel | IR | OperatorCode, ...operands: Array<IR>): void {
+    if (typeof arg0 === "object") {
+      this.instructions.push(arg0);
+    } else {
+      this.instructions.push(this.createOp(arg0), ...operands);
+    }
+  }
 
   /**
    * Push stack to control block stack, then pop on end.
@@ -271,7 +284,7 @@ export default class Compiler {
     if (this.scopedMemory.has(ident)) {
       id = this.scopedMemory.get(ident);
     } else {
-      id = this.uniqueId.get();
+      id = this.uniqueId.next();
       this.scopedMemory.set(ident, id);
     };
 
@@ -298,8 +311,8 @@ export default class Compiler {
       const globalReg = this.globalRegister;
       const valueReg = valueFn();
 
-      this.writeInstructions(this.createOp(OperatorCode.Put), this.createRegId(globalReg), ...this.createLiteral(name), this.createRegId(valueReg));
-      this.writeInstructions(this.createOp(OperatorCode.SetReg), this.createRegId(valueReg), this.createRegId(reg));
+      this.writeInstruction(OperatorCode.Put, this.createRegId(globalReg), ...this.createLiteral(name), this.createRegId(valueReg));
+      this.writeInstruction(OperatorCode.SetReg, this.createRegId(valueReg), this.createRegId(reg));
 
       // Free globalReg/valueReg
       this.registerAllocator.free();
@@ -310,8 +323,8 @@ export default class Compiler {
     } else {
       const valueReg = valueFn();
 
-      this.writeInstructions(this.createOp(OperatorCode.Out), ...this.compileMemory(name), this.createRegId(valueReg));
-      this.writeInstructions(this.createOp(OperatorCode.SetReg), this.createRegId(valueReg), this.createRegId(reg));
+      this.writeInstruction(OperatorCode.Out, ...this.compileMemory(name), this.createRegId(valueReg));
+      this.writeInstruction(OperatorCode.SetReg, this.createRegId(valueReg), this.createRegId(reg));
 
       // Free valueReg
       this.registerAllocator.free();
@@ -353,14 +366,14 @@ export default class Compiler {
         if (label) {
           for (const { break: breakLabel, label: labelName } of reversedControlBlock) {
             if (breakLabel && labelName === label) {
-              this.writeInstructions(this.createOp(OperatorCode.Jump), this.createReference(breakLabel));
+              this.writeInstruction(OperatorCode.Jump, this.createReference(breakLabel));
               break;
             }
           }
         } else {
           for (const { break: breakLabel } of reversedControlBlock) {
             if (breakLabel) {
-              this.writeInstructions(this.createOp(OperatorCode.Jump), this.createReference(breakLabel));
+              this.writeInstruction(OperatorCode.Jump, this.createReference(breakLabel));
               break;
             }
           }
@@ -374,14 +387,14 @@ export default class Compiler {
         if (label) {
           for (const { continue: continueLabel, label: labelName } of this.controlBlockStack.toReversed()) {
             if (continueLabel && labelName === label) {
-              this.writeInstructions(this.createOp(OperatorCode.Jump), this.createReference(continueLabel));
+              this.writeInstruction(OperatorCode.Jump, this.createReference(continueLabel));
               break;
             }
           }
         } else {
           for (const { continue: continueLabel } of this.controlBlockStack.toReversed()) {
             if (continueLabel) {
-              this.writeInstructions(this.createOp(OperatorCode.Jump), this.createReference(continueLabel));
+              this.writeInstruction(OperatorCode.Jump, this.createReference(continueLabel));
               break;
             }
           }
@@ -398,8 +411,8 @@ export default class Compiler {
         const altLabel = this.createLabelName();
         const endLabel = this.createLabelName();
 
-        this.writeInstructions(
-          this.createOp(OperatorCode.JumpIfFalse),
+        this.writeInstruction(
+          OperatorCode.JumpIfFalse,
           this.createReference(alternate ? altLabel : endLabel),
           this.createRegId(testReg),
         );
@@ -407,13 +420,13 @@ export default class Compiler {
         this.compileStatement(consequent);
 
         if (alternate) {
-          this.writeInstructions(this.createOp(OperatorCode.Jump), this.createReference(endLabel));
+          this.writeInstruction(OperatorCode.Jump, this.createReference(endLabel));
 
-          this.writeInstructions(this.createLabel(altLabel));
+          this.writeInstruction(this.createLabel(altLabel));
           this.compileStatement(alternate);
         }
 
-        this.writeInstructions(this.createLabel(endLabel));
+        this.writeInstruction(this.createLabel(endLabel));
 
         // Free testReg
         this.registerAllocator.free();
@@ -434,22 +447,22 @@ export default class Compiler {
             const testReg = this.compileExpression(_case.test);
             const seqResultReg = this.registerAllocator.next();
 
-            this.writeInstructions(this.createOp(OperatorCode.Seq), this.createRegId(testReg), this.createRegId(discriminantReg), this.createRegId(seqResultReg));
-            this.writeInstructions(this.createOp(OperatorCode.JumpIfTrue), this.createReference(`${caseLabel}_${i}`), this.createRegId(seqResultReg))
+            this.writeInstruction(OperatorCode.Seq, this.createRegId(testReg), this.createRegId(discriminantReg), this.createRegId(seqResultReg));
+            this.writeInstruction(OperatorCode.JumpIfTrue, this.createReference(`${caseLabel}_${i}`), this.createRegId(seqResultReg))
 
             // Free testReg/seqResultReg
             this.registerAllocator.free();
             this.registerAllocator.free();
           } else {
             // Case is default if test is null
-            this.writeInstructions(this.createOp(OperatorCode.Jump), this.createReference(defaultLabel));
+            this.writeInstruction(OperatorCode.Jump, this.createReference(defaultLabel));
           }
         });
         cases.forEach((_case, i) => {
           if (_case.test != null) {
-            this.writeInstructions(this.createLabel(`${caseLabel}_${i}`));
+            this.writeInstruction(this.createLabel(`${caseLabel}_${i}`));
           } else {
-            this.writeInstructions(this.createLabel(defaultLabel));
+            this.writeInstruction(this.createLabel(defaultLabel));
           }
 
           for (const _stat of _case.consequent) {
@@ -476,14 +489,14 @@ export default class Compiler {
           break: endStatementLabel
         });
 
-        this.writeInstructions(this.createLabel(bodyLabel));
+        this.writeInstruction(this.createLabel(bodyLabel));
 
         this.compileStatement(body);
 
-        this.writeInstructions(this.createLabel(testLabel));
+        this.writeInstruction(this.createLabel(testLabel));
 
         const testReg = this.compileExpression(test);
-        this.writeInstructions(this.createOp(OperatorCode.JumpIfTrue), this.createReference(bodyLabel), this.createRegId(testReg));
+        this.writeInstruction(OperatorCode.JumpIfTrue, this.createReference(bodyLabel), this.createRegId(testReg));
 
         // Free testReg
         this.registerAllocator.free();
@@ -511,11 +524,11 @@ export default class Compiler {
           this.compileStatement(newInit);
         }
 
-        this.writeInstructions(this.createLabel(testLabel));
+        this.writeInstruction(this.createLabel(testLabel));
         if (test) {
           const testReg = this.compileExpression(test);
 
-          this.writeInstructions(this.createOp(OperatorCode.JumpIfFalse), this.createReference(endStatementLabel), this.createRegId(testReg));
+          this.writeInstruction(OperatorCode.JumpIfFalse, this.createReference(endStatementLabel), this.createRegId(testReg));
 
           // Free testReg
           this.registerAllocator.free();
@@ -524,12 +537,12 @@ export default class Compiler {
         // this.writeInstructions(this.makeLabel(bodyLabel));
         this.compileStatement(body);
 
-        this.writeInstructions(this.createLabel(updateLabel));
+        this.writeInstruction(this.createLabel(updateLabel));
         if (update) {
           this.compileStatement(t.expressionStatement(update));
         }
 
-        this.writeInstructions(this.createOp(OperatorCode.Jump), this.createReference(testLabel));
+        this.writeInstruction(OperatorCode.Jump, this.createReference(testLabel));
 
         break;
       }
@@ -563,25 +576,25 @@ export default class Compiler {
         }
 
         const rightReg = this.compileExpression(right);
-        this.writeInstructions(this.createOp(OperatorCode.ForIn), this.createRegId(rightReg), this.createRegId(propertiesReg));
+        this.writeInstruction(OperatorCode.ForIn, this.createRegId(rightReg), this.createRegId(propertiesReg));
 
         // Jump if properties length is zero
-        this.writeInstructions(this.createOp(OperatorCode.Get), this.createRegId(propertiesReg), ...this.createLiteral("length"), this.createRegId(propertiesLengthReg));
-        this.writeInstructions(this.createOp(OperatorCode.Eq), this.createRegId(propertiesLengthReg), ...this.createLiteral(0), this.createRegId(isPropertiesLengthZeroReg));
-        this.writeInstructions(this.createOp(OperatorCode.JumpIfTrue), this.createReference(endStatementLabel), this.createRegId(isPropertiesLengthZeroReg));
+        this.writeInstruction(OperatorCode.Get, this.createRegId(propertiesReg), ...this.createLiteral("length"), this.createRegId(propertiesLengthReg));
+        this.writeInstruction(OperatorCode.Eq, this.createRegId(propertiesLengthReg), ...this.createLiteral(0), this.createRegId(isPropertiesLengthZeroReg));
+        this.writeInstruction(OperatorCode.JumpIfTrue, this.createReference(endStatementLabel), this.createRegId(isPropertiesLengthZeroReg));
         // Set zero to index
-        this.writeInstructions(this.createOp(OperatorCode.SetReg), ...this.createLiteral(0), this.createRegId(propertiesIndexReg));
+        this.writeInstruction(OperatorCode.SetReg, ...this.createLiteral(0), this.createRegId(propertiesIndexReg));
 
-        this.writeInstructions(this.createLabel(startLabel));
+        this.writeInstruction(this.createLabel(startLabel));
         // Set element
-        this.writeInstructions(this.createOp(OperatorCode.Get), this.createRegId(propertiesReg), this.createRegId(propertiesIndexReg), this.createRegId(propertiesItemReg));
-        this.writeInstructions(this.createOp(OperatorCode.Out), ...this.compileMemory(itemName), this.createRegId(propertiesItemReg));
+        this.writeInstruction(OperatorCode.Get, this.createRegId(propertiesReg), this.createRegId(propertiesIndexReg), this.createRegId(propertiesItemReg));
+        this.writeInstruction(OperatorCode.Out, ...this.compileMemory(itemName), this.createRegId(propertiesItemReg));
         // Compile body
         this.compileStatement(body);
         // Iterate
-        this.writeInstructions(this.createOp(OperatorCode.Add), this.createRegId(propertiesIndexReg), ...this.createLiteral(1), this.createRegId(propertiesIndexReg));
-        this.writeInstructions(this.createOp(OperatorCode.Lt), this.createRegId(propertiesIndexReg), this.createRegId(propertiesLengthReg), this.createRegId(isJumpableReg));
-        this.writeInstructions(this.createOp(OperatorCode.JumpIfTrue), this.createReference(startLabel), this.createRegId(isJumpableReg));
+        this.writeInstruction(OperatorCode.Add, this.createRegId(propertiesIndexReg), ...this.createLiteral(1), this.createRegId(propertiesIndexReg));
+        this.writeInstruction(OperatorCode.Lt, this.createRegId(propertiesIndexReg), this.createRegId(propertiesLengthReg), this.createRegId(isJumpableReg));
+        this.writeInstruction(OperatorCode.JumpIfTrue, this.createReference(startLabel), this.createRegId(isJumpableReg));
 
         // Free regs
         this.registerAllocator.free();
@@ -602,13 +615,13 @@ export default class Compiler {
           const varName = (declaration.id as t.Identifier).name;
 
           if (kind !== "var") {
-            this.writeInstructions(this.createOp(OperatorCode.SetVoid), ...this.compileMemory(varName));
+            this.writeInstruction(OperatorCode.SetVoid, ...this.compileMemory(varName));
           }
 
           if (declaration.init) {
             const initReg = this.compileExpression(declaration.init);
 
-            this.writeInstructions(this.createOp(OperatorCode.Out), ...this.compileMemory(varName), this.createRegId(initReg));
+            this.writeInstruction(OperatorCode.Out, ...this.compileMemory(varName), this.createRegId(initReg));
 
             // Free initReg
             this.registerAllocator.free();
@@ -625,16 +638,16 @@ export default class Compiler {
 
         const funcName = id.name;
 
-        this.writeInstructions(
-          this.createOp(OperatorCode.Func),
+        this.writeInstruction(
+          OperatorCode.Func,
           this.createReference(label),
           ...this.createLiteral(params.length),
           ...this.createLiteral("" /* funcName */),
           this.createRegId(funcReg),
         );
 
-        this.writeInstructions(
-          this.createOp(OperatorCode.SetValue),
+        this.writeInstruction(
+          OperatorCode.SetValue,
           ...this.compileMemory(funcName),
           this.createRegId(funcReg),
         );
@@ -649,12 +662,12 @@ export default class Compiler {
         if (stat.argument) {
           const argumentReg = this.compileExpression(stat.argument);
 
-          this.writeInstructions(this.createOp(OperatorCode.ReturnValue), this.createRegId(argumentReg));
+          this.writeInstruction(OperatorCode.ReturnValue, this.createRegId(argumentReg));
 
           // Free argumentReg
           this.registerAllocator.free();
         } else {
-          this.writeInstructions(this.createOp(OperatorCode.ReturnVoid));
+          this.writeInstruction(OperatorCode.ReturnVoid);
         }
 
         break;
@@ -672,7 +685,7 @@ export default class Compiler {
       case t.isThrowStatement(stat): {
         const argumentReg = this.compileExpression(stat.argument);
 
-        this.writeInstructions(this.createOp(OperatorCode.ThrowError), this.createRegId(argumentReg));
+        this.writeInstruction(OperatorCode.ThrowError, this.createRegId(argumentReg));
 
         // Free argument
         this.registerAllocator.free();
@@ -703,15 +716,15 @@ export default class Compiler {
         this.tryStack.push({ catch: catchLabel, finally: finallyLabel } satisfies Try);
 
         // Compile the try block
-        this.writeInstructions(
+        this.writeInstruction(
           // Jump to finally label when catch is not used + error is cached
-          this.createOp(OperatorCode.SetCatchAddr),
+          OperatorCode.SetCatchAddr,
           this.createReference(catchLabel || finallyLabel),
         );
         if (stat.finalizer) {
           // Execute finally, if return triggered in block or catch
-          this.writeInstructions(
-            this.createOp(OperatorCode.SetFinallyAddr),
+          this.writeInstruction(
+            OperatorCode.SetFinallyAddr,
             this.createReference(finallyLabel),
           );
         }
@@ -720,28 +733,28 @@ export default class Compiler {
         // jump to finallyLabel || tryCatchFinallyEndLabel
         if (stat.handler) {
           // This op is not running when error is occured
-          this.writeInstructions(this.createOp(OperatorCode.Jump), this.createReference(finallyLabel || tryCatchFinallyEndLabel));
+          this.writeInstruction(OperatorCode.Jump, this.createReference(finallyLabel || tryCatchFinallyEndLabel));
         }
 
         // Compile the catch block if it exists
         if (stat.handler) {
-          this.writeInstructions(this.createLabel(catchLabel));
+          this.writeInstruction(this.createLabel(catchLabel));
 
           const errorReg = this.registerAllocator.next();
 
-          this.writeInstructions(
-            this.createOp(OperatorCode.SetCatchAddr),
+          this.writeInstruction(
+            OperatorCode.SetCatchAddr,
             ...(stat.finalizer ? [this.createReference(finallyLabel)] : parentTryCatch),
           );
 
           if (stat.handler.param) {
             const name = (stat.handler.param as t.Identifier).name;
 
-            this.writeInstructions(this.createOp(OperatorCode.PushError), this.createRegId(errorReg));
-            this.writeInstructions(this.createOp(OperatorCode.VoidError));
-            this.writeInstructions(this.createOp(OperatorCode.SetValue), ...this.compileMemory(name), this.createRegId(errorReg));
+            this.writeInstruction(OperatorCode.PushError, this.createRegId(errorReg));
+            this.writeInstruction(OperatorCode.VoidError);
+            this.writeInstruction(OperatorCode.SetValue, ...this.compileMemory(name), this.createRegId(errorReg));
           } else {
-            this.writeInstructions(this.createOp(OperatorCode.VoidError));
+            this.writeInstruction(OperatorCode.VoidError);
           }
 
           this.compileStatement(stat.handler.body);
@@ -754,27 +767,27 @@ export default class Compiler {
 
         // Compile the finally block if it exists
         if (stat.finalizer) {
-          this.writeInstructions(this.createLabel(finallyLabel));
+          this.writeInstruction(this.createLabel(finallyLabel));
 
           // TODO: Fix if theres error, parentTryFinally will not running
 
-          this.writeInstructions(
-            this.createOp(OperatorCode.SetCatchAddr),
+          this.writeInstruction(
+            OperatorCode.SetCatchAddr,
             ...parentTryCatch,
           );
-          this.writeInstructions(
-            this.createOp(OperatorCode.SetFinallyAddr),
+          this.writeInstruction(
+            OperatorCode.SetFinallyAddr,
             ...parentTryFinally,
           );
 
           this.compileStatement(stat.finalizer);
-          this.writeInstructions(this.createOp(OperatorCode.ThrowErrorOrDoFinally));
+          this.writeInstruction(OperatorCode.ThrowErrorOrDoFinally);
         }
 
         // Write the end label
-        this.writeInstructions(this.createLabel(tryCatchFinallyEndLabel));
-        this.writeInstructions(
-          this.createOp(OperatorCode.SetCatchAddr),
+        this.writeInstruction(this.createLabel(tryCatchFinallyEndLabel));
+        this.writeInstruction(
+          OperatorCode.SetCatchAddr,
           ...parentTryCatch,
         );
 
@@ -788,7 +801,7 @@ export default class Compiler {
       }
     }
 
-    this.writeInstructions(this.createLabel(endStatementLabel));
+    this.writeInstruction(this.createLabel(endStatementLabel));
   }
 
   /**
@@ -806,7 +819,7 @@ export default class Compiler {
           case "undefined": {
             const reg = this.registerAllocator.next();
 
-            this.writeInstructions(this.createOp(OperatorCode.Void), this.createRegId(reg));
+            this.writeInstruction(OperatorCode.Void, this.createRegId(reg));
 
             return reg;
           }
@@ -814,7 +827,7 @@ export default class Compiler {
           case "arguments": {
             const reg = this.registerAllocator.next();
 
-            this.writeInstructions(this.createOp(OperatorCode.SetReg), this.createRegId(ARGUMENTS_REG), this.createRegId(reg));
+            this.writeInstruction(OperatorCode.SetReg, this.createRegId(ARGUMENTS_REG), this.createRegId(reg));
 
             return reg;
           }
@@ -822,7 +835,7 @@ export default class Compiler {
           case "Promise": {
             const reg = this.registerAllocator.next();
 
-            this.writeInstructions(this.createOp(OperatorCode.Promise), this.createRegId(reg));
+            this.writeInstruction(OperatorCode.Promise, this.createRegId(reg));
 
             return reg;
           }
@@ -830,7 +843,7 @@ export default class Compiler {
           case REGENERATOR_RUNTIME_FUNCTION_IDENTIFIER: {
             const reg = this.registerAllocator.next();
 
-            this.writeInstructions(this.createOp(OperatorCode.RegeneratorRuntime), this.createRegId(reg));
+            this.writeInstruction(OperatorCode.RegeneratorRuntime, this.createRegId(reg));
 
             return reg;
           }
@@ -843,9 +856,9 @@ export default class Compiler {
 
             if (this.scopedMemory.has(expr.name) === false) {
               // TODO: V8 throws error when unknown variable does not exists on global
-              this.writeInstructions(this.createOp(OperatorCode.GetWindowProp), ...this.createLiteral(expr.name), this.createRegId(reg));
+              this.writeInstruction(OperatorCode.GetWindowProp, ...this.createLiteral(expr.name), this.createRegId(reg));
             } else {
-              this.writeInstructions(this.createOp(OperatorCode.Load), ...this.compileMemory(expr.name), this.createRegId(reg));
+              this.writeInstruction(OperatorCode.Load, ...this.compileMemory(expr.name), this.createRegId(reg));
             }
 
             return reg;
@@ -858,26 +871,26 @@ export default class Compiler {
 
         // TemplateLiteral | BigIntLiteral | DecimalLiteral already converted with plugin
 
-        // Write operation
-        this.writeInstructions(
-          this.createOp(
-            t.isRegExpLiteral(expr) ?
-              OperatorCode.NewRegExp :
-              OperatorCode.SetReg
-          ),
-        );
+        let regexpData: Array<IR>;
 
         if (t.isRegExpLiteral(expr)) {
-          this.writeInstructions(...this.createLiteral(expr.pattern), ...this.createLiteral(expr.flags));
+          regexpData = this.createLiteral(expr.pattern).concat(this.createLiteral(expr.flags));
         } else if (t.isNumericLiteral(expr) || t.isStringLiteral(expr) || t.isBooleanLiteral(expr)) {
-          this.writeInstructions(...this.createLiteral(expr.value));
+          regexpData = this.createLiteral(expr.value);
         } else if (t.isNullLiteral(expr)) {
-          this.writeInstructions(...this.createLiteral(null));
+          regexpData = this.createLiteral(null);
         } else {
           throw new Error(`Unsupported literal type: ${expr.type}`);
-        }
+        };
 
-        this.writeInstructions(this.createRegId(literalReg));
+        // Write regexp
+        this.writeInstruction(
+          t.isRegExpLiteral(expr) ?
+            OperatorCode.NewRegExp :
+            OperatorCode.SetReg,
+          ...regexpData,
+          this.createRegId(literalReg),
+        );
 
         return literalReg;
       }
@@ -885,7 +898,7 @@ export default class Compiler {
       case t.isThisExpression(expr): {
         const reg = this.registerAllocator.next();
 
-        this.writeInstructions(this.createOp(OperatorCode.GetCurrentThis), this.createRegId(reg));
+        this.writeInstruction(OperatorCode.GetCurrentThis, this.createRegId(reg));
 
         return reg;
       }
@@ -896,16 +909,16 @@ export default class Compiler {
         const arrayReg = this.registerAllocator.next();
 
         if (elements.length === 0) {
-          this.writeInstructions(this.createOp(OperatorCode.EmptyArray), this.createRegId(arrayReg));
+          this.writeInstruction(OperatorCode.EmptyArray, this.createRegId(arrayReg));
         } else {
-          this.writeInstructions(this.createOp(OperatorCode.NewArray), ...this.createLiteral(elements.length), this.createRegId(arrayReg));
+          this.writeInstruction(OperatorCode.NewArray, ...this.createLiteral(elements.length), this.createRegId(arrayReg));
 
           elements.forEach((element, i) => {
             if (element) {
               // We already converted spread with plugin
               const elementReg = this.compileExpression(element as t.Expression);
 
-              this.writeInstructions(this.createOp(OperatorCode.Put), this.createRegId(arrayReg), ...this.createLiteral(i), this.createRegId(elementReg));
+              this.writeInstruction(OperatorCode.Put, this.createRegId(arrayReg), ...this.createLiteral(i), this.createRegId(elementReg));
 
               // Free elementReg
               this.registerAllocator.free();
@@ -921,15 +934,15 @@ export default class Compiler {
 
         const objectReg = this.registerAllocator.next();
 
-        this.writeInstructions(this.createOp(OperatorCode.EmptyObject), this.createRegId(objectReg));
+        this.writeInstruction(OperatorCode.EmptyObject, this.createRegId(objectReg));
 
         (properties as t.ObjectProperty[]).forEach(({ computed, key, value }) => {
           if (computed) {
             const keyReg = this.compileExpression(key as t.Expression);
             const valueReg = this.compileExpression(value as t.Expression);
 
-            this.writeInstructions(
-              this.createOp(OperatorCode.Put),
+            this.writeInstruction(
+              OperatorCode.Put,
               this.createRegId(objectReg),
               this.createRegId(keyReg),
               this.createRegId(valueReg)
@@ -946,8 +959,8 @@ export default class Compiler {
                 this.createLiteral(key.name) :
                 this.createLiteral((key as t.StringLiteral | t.NumericLiteral).value);
 
-            this.writeInstructions(
-              this.createOp(OperatorCode.Put),
+            this.writeInstruction(
+              OperatorCode.Put,
               this.createRegId(objectReg),
               ...staticKeyOrDynamicKey,
               this.createRegId(valueReg),
@@ -970,7 +983,7 @@ export default class Compiler {
           case "+": {
             const valueReg = this.compileExpression(argument);
 
-            this.writeInstructions(this.createOp(OperatorCode.Add), ...this.createLiteral(0), this.createRegId(valueReg));
+            this.writeInstruction(OperatorCode.Add, ...this.createLiteral(0), this.createRegId(valueReg));
 
             this.registerAllocator.free();
 
@@ -981,7 +994,7 @@ export default class Compiler {
             const valueReg = this.compileExpression(argument);
 
             // TODO: zero should be minus zero, but zero
-            this.writeInstructions(this.createOp(OperatorCode.Sub), ...this.createLiteral(0), this.createRegId(valueReg));
+            this.writeInstruction(OperatorCode.Sub, ...this.createLiteral(0), this.createRegId(valueReg));
 
             this.registerAllocator.free();
 
@@ -991,7 +1004,7 @@ export default class Compiler {
           case "!": {
             const valueReg = this.compileExpression(argument);
 
-            this.writeInstructions(this.createOp(OperatorCode.Not), this.createRegId(valueReg));
+            this.writeInstruction(OperatorCode.Not, this.createRegId(valueReg));
 
             this.registerAllocator.free();
 
@@ -1001,7 +1014,7 @@ export default class Compiler {
           case "~": {
             const valueReg = this.compileExpression(argument);
 
-            this.writeInstructions(this.createOp(OperatorCode.BNot), this.createRegId(valueReg));
+            this.writeInstruction(OperatorCode.BNot, this.createRegId(valueReg));
 
             this.registerAllocator.free();
 
@@ -1011,7 +1024,7 @@ export default class Compiler {
           case "typeof": {
             const valueReg = this.compileExpression(argument);
 
-            this.writeInstructions(this.createOp(OperatorCode.TypeOf), this.createRegId(valueReg));
+            this.writeInstruction(OperatorCode.TypeOf, this.createRegId(valueReg));
 
             this.registerAllocator.free();
 
@@ -1021,7 +1034,7 @@ export default class Compiler {
           case "void": {
             this.compileExpression(argument);
 
-            this.writeInstructions(this.createOp(OperatorCode.Void));
+            this.writeInstruction(OperatorCode.Void);
 
             this.registerAllocator.free();
 
@@ -1039,25 +1052,27 @@ export default class Compiler {
                 this.registerAllocator.free();
               }
 
-              this.writeInstructions(this.createOp(OperatorCode.Delete));
-              this.writeInstructions(this.createRegId(objectReg));
-              if (propertyReg) {
-                this.writeInstructions(this.createRegId(propertyReg));
-              } else {
-                this.writeInstructions(...this.createLiteral((argument.property as t.Identifier).name));
-              }
+              this.writeInstruction(
+                OperatorCode.Delete,
+                this.createRegId(objectReg),
+                ...(
+                  propertyReg ?
+                    [this.createRegId(propertyReg)] :
+                    this.createLiteral((argument.property as t.Identifier).name)
+                ),
+              );
 
               // Free objectReg
               this.registerAllocator.free();
             } else {
-              this.writeInstructions(this.createOp(OperatorCode.SetReg), ...this.createLiteral(false));
+              this.writeInstruction(OperatorCode.SetReg, ...this.createLiteral(false));
             }
 
             break;
           }
         }
 
-        this.writeInstructions(this.createRegId(unaryReg));
+        this.writeInstruction(this.createRegId(unaryReg));
 
         return unaryReg;
       }
@@ -1076,9 +1091,12 @@ export default class Compiler {
         this.registerAllocator.free();
         // this.register.freeRegister();
 
-        this.writeInstructions(this.createOp(op));
-
-        this.writeInstructions(this.createRegId(leftReg), this.createRegId(rightReg), this.createRegId(binaryReg));
+        this.writeInstruction(
+          op,
+          this.createRegId(leftReg),
+          this.createRegId(rightReg),
+          this.createRegId(binaryReg),
+        );
 
         return binaryReg;
       }
@@ -1094,14 +1112,14 @@ export default class Compiler {
         if (t.isIdentifier(argument)) {
           const argumentReg = this.compileExpression(argument);
 
-          this.writeInstructions(this.createOp(op), this.createRegId(argumentReg), ...this.createLiteral(1), this.createRegId(updateReg));
+          this.writeInstruction(op, this.createRegId(argumentReg), ...this.createLiteral(1), this.createRegId(updateReg));
           // OUT argument.name -> valueReg
-          this.writeInstructions(this.createOp(OperatorCode.Out), ...this.compileMemory(argument.name), this.createRegId(updateReg));
+          this.writeInstruction(OperatorCode.Out, ...this.compileMemory(argument.name), this.createRegId(updateReg));
 
           if (!prefix) {
             // SUB | ADD updateReg (- | +) 1 -> updateReg
-            this.writeInstructions(
-              this.createOp(invertedOp),
+            this.writeInstruction(
+              invertedOp,
               this.createRegId(updateReg),
               ...this.createLiteral(1),
               this.createRegId(updateReg),
@@ -1123,32 +1141,36 @@ export default class Compiler {
           }
 
           // GET objectReg[argument.property | argument.property.name] -> getValueReg
-          this.writeInstructions(this.createOp(OperatorCode.Get));
-          this.writeInstructions(this.createRegId(objectReg));
-          if (propertyReg) {
-            this.writeInstructions(this.createRegId(propertyReg));
-          } else {
-            this.writeInstructions(...this.createLiteral((argument.property as t.Identifier).name));
-          }
-          this.writeInstructions(this.createRegId(getValueReg));
+          this.writeInstruction(
+            OperatorCode.Get,
+            this.createRegId(objectReg),
+            ...(
+              propertyReg ?
+                [this.createRegId(propertyReg)] :
+                this.createLiteral((argument.property as t.Identifier).name)
+            ),
+            this.createRegId(getValueReg),
+          );
 
           // op 1 (+ | -) getValueReg -> updateReg
-          this.writeInstructions(this.createOp(op), this.createRegId(getValueReg), ...this.createLiteral(1), this.createRegId(updateReg));
+          this.writeInstruction(op, this.createRegId(getValueReg), ...this.createLiteral(1), this.createRegId(updateReg));
 
           // PUT objectReg[argument.property | argument.property.name] = updateReg
-          this.writeInstructions(this.createOp(OperatorCode.Put));
-          this.writeInstructions(this.createRegId(objectReg));
-          if (propertyReg) {
-            this.writeInstructions(this.createRegId(propertyReg));
-          } else {
-            this.writeInstructions(...this.createLiteral((argument.property as t.Identifier).name));
-          }
-          this.writeInstructions(this.createRegId(updateReg));
+          this.writeInstruction(
+            OperatorCode.Put,
+            this.createRegId(objectReg),
+            ...(
+              propertyReg ?
+                [this.createRegId(propertyReg)] :
+                this.createLiteral((argument.property as t.Identifier).name)
+            ),
+            this.createRegId(updateReg),
+          );
 
           if (!prefix) {
             // SUB | ADD updateReg (- | +) 1 -> updateReg
-            this.writeInstructions(
-              this.createOp(invertedOp),
+            this.writeInstruction(
+              invertedOp,
               this.createRegId(updateReg),
               ...this.createLiteral(1),
               this.createRegId(updateReg),
@@ -1181,7 +1203,7 @@ export default class Compiler {
               // Reuse leftReg
               const valueReg = leftReg;
 
-              this.writeInstructions(this.createOp(op), this.createRegId(leftReg), this.createRegId(rightReg), this.createRegId(valueReg));
+              this.writeInstruction(op, this.createRegId(leftReg), this.createRegId(rightReg), this.createRegId(valueReg));
 
               // Free rightReg
               this.registerAllocator.free();
@@ -1197,15 +1219,15 @@ export default class Compiler {
             const propertyReg = this.compileExpression(left.property as t.Expression);
 
             if (operator === "=") {
-              this.writeInstructions(this.createOp(OperatorCode.Put), this.createRegId(objectReg), this.createRegId(propertyReg), this.createRegId(rightReg));
-              this.writeInstructions(this.createOp(OperatorCode.SetReg), this.createRegId(rightReg), this.createRegId(assignReg));
+              this.writeInstruction(OperatorCode.Put, this.createRegId(objectReg), this.createRegId(propertyReg), this.createRegId(rightReg));
+              this.writeInstruction(OperatorCode.SetReg, this.createRegId(rightReg), this.createRegId(assignReg));
             } else {
               const valueReg = this.registerAllocator.next();
 
-              this.writeInstructions(this.createOp(OperatorCode.Get), this.createRegId(objectReg), this.createRegId(propertyReg), this.createRegId(valueReg));
-              this.writeInstructions(this.createOp(op), this.createRegId(valueReg), this.createRegId(rightReg), this.createRegId(valueReg));
-              this.writeInstructions(this.createOp(OperatorCode.Put), this.createRegId(objectReg), this.createRegId(propertyReg), this.createRegId(valueReg));
-              this.writeInstructions(this.createOp(OperatorCode.SetReg), this.createRegId(valueReg), this.createRegId(assignReg));
+              this.writeInstruction(OperatorCode.Get, this.createRegId(objectReg), this.createRegId(propertyReg), this.createRegId(valueReg));
+              this.writeInstruction(op, this.createRegId(valueReg), this.createRegId(rightReg), this.createRegId(valueReg));
+              this.writeInstruction(OperatorCode.Put, this.createRegId(objectReg), this.createRegId(propertyReg), this.createRegId(valueReg));
+              this.writeInstruction(OperatorCode.SetReg, this.createRegId(valueReg), this.createRegId(assignReg));
 
               // Free valueReg
               this.registerAllocator.free();
@@ -1219,19 +1241,19 @@ export default class Compiler {
             const property = this.createLiteral((left.property as t.Identifier).name);
 
             if (operator === "=") {
-              this.writeInstructions(this.createOp(OperatorCode.Put), this.createRegId(objectReg), ...property, this.createRegId(rightReg));
-              this.writeInstructions(this.createOp(OperatorCode.SetReg), this.createRegId(rightReg), this.createRegId(assignReg));
+              this.writeInstruction(OperatorCode.Put, this.createRegId(objectReg), ...property, this.createRegId(rightReg));
+              this.writeInstruction(OperatorCode.SetReg, this.createRegId(rightReg), this.createRegId(assignReg));
             } else {
               const valueReg = this.registerAllocator.next();
 
               // Get the property value, then
-              this.writeInstructions(this.createOp(OperatorCode.Get), this.createRegId(objectReg), ...property, this.createRegId(valueReg));
+              this.writeInstruction(OperatorCode.Get, this.createRegId(objectReg), ...property, this.createRegId(valueReg));
               // Apply op value to getted value
-              this.writeInstructions(this.createOp(op), this.createRegId(valueReg), this.createRegId(rightReg), this.createRegId(valueReg));
+              this.writeInstruction(op, this.createRegId(valueReg), this.createRegId(rightReg), this.createRegId(valueReg));
               // And push back value
-              this.writeInstructions(this.createOp(OperatorCode.Put), this.createRegId(objectReg), ...property, this.createRegId(valueReg));
+              this.writeInstruction(OperatorCode.Put, this.createRegId(objectReg), ...property, this.createRegId(valueReg));
               // Copy value to assignReg
-              this.writeInstructions(this.createOp(OperatorCode.SetReg), this.createRegId(valueReg), this.createRegId(assignReg));
+              this.writeInstruction(OperatorCode.SetReg, this.createRegId(valueReg), this.createRegId(assignReg));
 
               // Free valueReg
               this.registerAllocator.free();
@@ -1255,8 +1277,10 @@ export default class Compiler {
 
         const endLabel = this.createLabelName();
 
-        this.writeInstructions(
-          this.createOp(operator === "&&" ? OperatorCode.JumpIfFalse : OperatorCode.JumpIfTrue),
+        this.writeInstruction(
+          operator === "&&" ?
+            OperatorCode.JumpIfFalse :
+            OperatorCode.JumpIfTrue,
           this.createReference(endLabel),
           this.createRegId(leftReg),
         );
@@ -1264,9 +1288,9 @@ export default class Compiler {
         // Logical right not consumed when left is truthy|falsy
         const rightReg = this.compileExpression(right);
 
-        this.writeInstructions(this.createOp(OperatorCode.SetReg), this.createRegId(rightReg), this.createRegId(leftReg));
+        this.writeInstruction(OperatorCode.SetReg, this.createRegId(rightReg), this.createRegId(leftReg));
 
-        this.writeInstructions(this.createLabel(endLabel));
+        this.writeInstruction(this.createLabel(endLabel));
 
         // Free rightReg
         this.registerAllocator.free();
@@ -1287,14 +1311,16 @@ export default class Compiler {
         }
 
         // GET objectReg[property | property.name] -> memberReg
-        this.writeInstructions(this.createOp(OperatorCode.Get));
-        this.writeInstructions(this.createRegId(objectReg));
-        if (propertyReg) {
-          this.writeInstructions(this.createRegId(propertyReg));
-        } else {
-          this.writeInstructions(...this.createLiteral((expr.property as t.Identifier).name));
-        }
-        this.writeInstructions(this.createRegId(memberReg));
+        this.writeInstruction(
+          OperatorCode.Get,
+          this.createRegId(objectReg),
+          ...(
+            propertyReg ?
+              [this.createRegId(propertyReg)] :
+              this.createLiteral((expr.property as t.Identifier).name)
+          ),
+          this.createRegId(memberReg),
+        );
 
         // Free objectReg
         // this.register.freeRegister();
@@ -1313,19 +1339,19 @@ export default class Compiler {
         const altLabel = this.createLabelName();
 
         // JUMP_IF_FALSE testReg : ip = altLabel
-        this.writeInstructions(this.createOp(OperatorCode.JumpIfFalse), this.createReference(altLabel), this.createRegId(testReg));
+        this.writeInstruction(OperatorCode.JumpIfFalse, this.createReference(altLabel), this.createRegId(testReg));
 
         // Compile consequent if test is true
         const consequentReg = this.compileExpression(consequent)
-        this.writeInstructions(this.createOp(OperatorCode.SetReg), this.createRegId(consequentReg), this.createRegId(assignReg));
-        this.writeInstructions(this.createOp(OperatorCode.Jump), this.createReference(endLabel));
+        this.writeInstruction(OperatorCode.SetReg, this.createRegId(consequentReg), this.createRegId(assignReg));
+        this.writeInstruction(OperatorCode.Jump, this.createReference(endLabel));
 
         // Compile alternate if test is false
-        this.writeInstructions(this.createLabel(altLabel));
+        this.writeInstruction(this.createLabel(altLabel));
         const alternateReg = this.compileExpression(alternate);
-        this.writeInstructions(this.createOp(OperatorCode.SetReg), this.createRegId(alternateReg), this.createRegId(assignReg));
+        this.writeInstruction(OperatorCode.SetReg, this.createRegId(alternateReg), this.createRegId(assignReg));
 
-        this.writeInstructions(this.createLabel(endLabel));
+        this.writeInstruction(this.createLabel(endLabel));
 
         // Free consequent/alternate
         this.registerAllocator.free();
@@ -1355,17 +1381,19 @@ export default class Compiler {
           }
 
           // GET objectReg[property | property.name] -> funcReg
-          this.writeInstructions(this.createOp(OperatorCode.Get));
-          this.writeInstructions(this.createRegId(objectReg));
-          if (propertyReg) {
-            this.writeInstructions(this.createRegId(propertyReg));
-          } else {
-            this.writeInstructions(...this.createLiteral((property as t.Identifier).name));
-          }
-          this.writeInstructions(this.createRegId(funcReg));
+          this.writeInstruction(
+            OperatorCode.Get,
+            this.createRegId(objectReg),
+            ...(
+              propertyReg ?
+                [this.createRegId(propertyReg)] :
+                this.createLiteral((property as t.Identifier).name)
+            ),
+            this.createRegId(funcReg),
+          );
 
           // CALL funcReg.apply(objectReg, argsReg)
-          this.writeInstructions(this.createOp(OperatorCode.Call), this.createRegId(argsReg), this.createRegId(funcReg), this.createRegId(objectReg));
+          this.writeInstruction(OperatorCode.Call, this.createRegId(argsReg), this.createRegId(funcReg), this.createRegId(objectReg));
 
           // Free args/funcReg/objectReg
           this.registerAllocator.free();
@@ -1383,7 +1411,7 @@ export default class Compiler {
             args.forEach((arg, i) => argsReg[i] = this.createRegId(this.compileExpression(arg as t.Expression)));
 
             // CALL_FUNCTION_XARG funcReg(...args) -> callReg
-            this.writeInstructions(this.createOp(getFiniteLikeCallOperatorCode(args.length)), this.createRegId(funcReg), ...argsReg, this.createRegId(callReg));
+            this.writeInstruction(getFiniteLikeCallOperatorCode(args.length), this.createRegId(funcReg), ...argsReg, this.createRegId(callReg));
 
             // Free args
             args.forEach(() => this.registerAllocator.free());
@@ -1397,7 +1425,7 @@ export default class Compiler {
             const thisReg = this.globalRegister;
 
             // CALL funcReg.apply(thisReg, argsReg)
-            this.writeInstructions(this.createOp(OperatorCode.Call), this.createRegId(argsReg), this.createRegId(funcReg), this.createRegId(thisReg));
+            this.writeInstruction(OperatorCode.Call, this.createRegId(argsReg), this.createRegId(funcReg), this.createRegId(thisReg));
 
             // Free args/thisReg/funcReg
             this.registerAllocator.free();
@@ -1420,7 +1448,7 @@ export default class Compiler {
         // Reuse argsReg
         const newReg = constructorReg;
 
-        this.writeInstructions(this.createOp(OperatorCode.New), this.createRegId(constructorReg), this.createRegId(argsReg), this.createRegId(newReg));
+        this.writeInstruction(OperatorCode.New, this.createRegId(constructorReg), this.createRegId(argsReg), this.createRegId(newReg));
 
         // Free argsReg
         this.registerAllocator.free();
@@ -1448,8 +1476,8 @@ export default class Compiler {
 
         const funcReg = this.registerAllocator.next();
 
-        this.writeInstructions(
-          this.createOp(OperatorCode.Func),
+        this.writeInstruction(
+          OperatorCode.Func,
           this.createReference(label),
           ...this.createLiteral(params.length),
           ...this.createLiteral("" /* expr.id ? expr.id.name : null */),
@@ -1457,7 +1485,7 @@ export default class Compiler {
         );
 
         if (functionId) {
-          this.writeInstructions(this.createOp(OperatorCode.SetValue), ...this.createLiteral(functionId), this.createRegId(funcReg));
+          this.writeInstruction(OperatorCode.SetValue, ...this.createLiteral(functionId), this.createRegId(funcReg));
         }
 
         return funcReg;
@@ -1475,7 +1503,7 @@ export default class Compiler {
    * Compiles compilable block.
    */
   private compileBlock(block: CompilableBlock) {
-    this.writeInstructions(this.createLabel(block.label));
+    this.writeInstruction(this.createLabel(block.label));
 
     switch (true) {
       case t.isProgram(block): {
@@ -1484,12 +1512,14 @@ export default class Compiler {
         {
           const globalReg = this.registerAllocator.next();
 
-          this.writeInstructions(
-            this.createOp(OperatorCode.GetWindowProp),
+          this.writeInstruction(
+            OperatorCode.GetWindowProp,
             ...this.createLiteral("window"),
             this.createRegId(globalReg),
-
-            this.createOp(OperatorCode.SetValue),
+          );
+          
+          this.writeInstruction(
+            OperatorCode.SetValue,
             ...this.createLiteral(this.memoryDictionary.get("GLOBAL")),
             this.createRegId(globalReg),
           );
@@ -1499,13 +1529,13 @@ export default class Compiler {
         }
 
         // Init declare all variable declrations (only var kinds are declared)
-        block.declarations.forEach(name => this.writeInstructions(this.createOp(OperatorCode.SetVoid), ...this.compileMemory(name)));
+        block.declarations.forEach(name => this.writeInstruction(OperatorCode.SetVoid, ...this.compileMemory(name)));
 
         // Assume program body as block statement, compile all statements
         this.compileStatement(t.blockStatement(block.body));
 
         // Execution end, terminate program
-        this.writeInstructions(this.createOp(OperatorCode.Term));
+        this.writeInstruction(OperatorCode.Term);
 
         break;
       }
@@ -1521,8 +1551,8 @@ export default class Compiler {
         // Define all parameters
         for (let i = 0; i < block.params.length; i++) {
           const { name } = block.params[i] as t.Identifier;
-          this.writeInstructions(
-            this.createOp(OperatorCode.SetValue),
+          this.writeInstruction(
+            OperatorCode.SetValue,
             ...this.compileMemory(name),
             this.createRegId(
               createRegister(registerToNumber(ARGUMENTS_SPREAD_REG) + i),
@@ -1538,12 +1568,13 @@ export default class Compiler {
         ) {
           const funcReg = this.registerAllocator.next();
 
-          this.writeInstructions(
-            this.createOp(OperatorCode.Load),
+          this.writeInstruction(
+            OperatorCode.Load,
             ...this.createLiteral(block.functionId),
             this.createRegId(funcReg),
-
-            this.createOp(OperatorCode.SetValue),
+          );
+          this.writeInstruction(
+            OperatorCode.SetValue,
             ...this.compileMemory(block.id.name),
             this.createRegId(funcReg),
           );
@@ -1553,13 +1584,13 @@ export default class Compiler {
         }
 
         // Init declare all variable declrations (only var kinds are declared)
-        block.declarations.forEach(name => this.writeInstructions(this.createOp(OperatorCode.SetVoid), ...this.compileMemory(name)));
+        block.declarations.forEach(name => this.writeInstruction(OperatorCode.SetVoid, ...this.compileMemory(name)));
 
         // Compile block body
         this.compileStatement(block.body);
 
         // Return void at end (RETURN_VALUE will execute if there is)
-        this.writeInstructions(this.createOp(OperatorCode.ReturnVoid));
+        this.writeInstruction(OperatorCode.ReturnVoid);
 
         // Set register to previous
         this.registerAllocator.set(stackRegister);
@@ -1716,8 +1747,8 @@ export default class Compiler {
    * Set function call result to given register r.
    */
   private set functionReturn(r: Register) {
-    this.writeInstructions(
-      this.createOp(OperatorCode.SetReg),
+    this.writeInstruction(
+      OperatorCode.SetReg,
       this.createRegId(FUNCTION_RESULT_REG),
       this.createRegId(r),
     );
@@ -1729,8 +1760,8 @@ export default class Compiler {
   private get globalRegister(): Register {
     const reg = this.registerAllocator.next();
 
-    this.writeInstructions(
-      this.createOp(OperatorCode.Load),
+    this.writeInstruction(
+      OperatorCode.Load,
       ...this.createLiteral(this.memoryDictionary.get("GLOBAL")),
       this.createRegId(reg),
     );
