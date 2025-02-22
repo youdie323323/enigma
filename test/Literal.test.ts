@@ -147,4 +147,90 @@ describe("Literal and operator tests", () => {
             expect(window.result5).toBe(12);
         });
     });
+
+    describe("RegExp tests", () => {
+        test("RegExp literals should work correctly", async () => {
+            await executeCode(`
+                window.result1 = /test/.test("test");
+                window.result2 = /^test$/.test("test");
+                window.result3 = /t[e]st/.test("test");
+                window.result4 = /test/i.test("TEST");
+                window.result5 = /\\d+/.test("123");
+                window.result6 = /test/g.toString() === "/test/g";
+            `);
+
+            for (let i = 1; i <= 6; i++) {
+                expect(window[`result${i}`]).toBe(true);
+            }
+        });
+
+        test("RegExp methods should work correctly", async () => {
+            await executeCode(`
+                window.result1 = "test".match(/t(e)st/)[1] === "e";
+                window.result2 = "test test".replace(/test/g, "pass") === "pass pass";
+                window.result3 = "test".search(/st/) === 2;
+                window.result4 = "test".split(/s/).join(",") === "te,t";
+                
+                const regex = /t(e)(s)t/;
+                const str = "test";
+                const match = regex.exec(str);
+                window.result5 = match[0] === "test" && match[1] === "e" && match[2] === "s";
+                
+                window.result6 = "test123test".match(/test/g).length === 2;
+            `);
+
+            for (let i = 1; i <= 6; i++) {
+                expect(window[`result${i}`]).toBe(true);
+            }
+        });
+
+        test("RegExp flags should work correctly", async () => {
+            await executeCode(`
+                window.result1 = /test/i.test("TEST");
+                window.result2 = /test/g.global === true;
+                window.result3 = /test/m.multiline === true;
+                window.result4 = /test/i.ignoreCase === true;
+                window.result5 = /./s.dotAll === true;
+                window.result6 = /test/u.unicode === true;
+            `);
+
+            for (let i = 1; i <= 6; i++) {
+                expect(window[`result${i}`]).toBe(true);
+            }
+        });
+
+        test("RegExp character classes should work correctly", async () => {
+            await executeCode(`
+                window.result1 = /\\d/.test("1");
+                window.result2 = /\\w/.test("a");
+                window.result3 = /\\s/.test(" ");
+                window.result4 = /\\D/.test("a");
+                window.result5 = /\\W/.test("!");
+                window.result6 = /\\S/.test("x");
+                window.result7 = /[a-z]/.test("x");
+                window.result8 = /[^a-z]/.test("1");
+            `);
+
+            for (let i = 1; i <= 8; i++) {
+                expect(window[`result${i}`]).toBe(true);
+            }
+        });
+
+        test("RegExp quantifiers should work correctly", async () => {
+            await executeCode(`
+                window.result1 = /a?/.test("");
+                window.result2 = /a*/.test("aaa");
+                window.result3 = /a+/.test("a");
+                window.result4 = /a{2}/.test("aa");
+                window.result5 = /a{2,}/.test("aaa");
+                window.result6 = /a{2,4}/.test("aaa");
+                window.result7 = /(test){2}/.test("testtest");
+                window.result8 = /^(?:a|b)+$/.test("aba");
+            `);
+
+            for (let i = 1; i <= 8; i++) {
+                expect(window[`result${i}`]).toBe(true);
+            }
+        });
+    });
 });
