@@ -119,7 +119,7 @@ export default class InterpreterBuilder {
         );
 
         interpreterStatements.push(
-            ...this.compileWellKnownGlobalObjectsDefinition(defaultEnvironment),
+            ...this.compileWellKnownGlobalObjectDefinitions(defaultEnvironment),
         );
 
         interpreterStatements.push(
@@ -196,15 +196,6 @@ export default class InterpreterBuilder {
         const bigObjectLikeInstancesArg = generateIdentifier();
         const stateRelatedFunctionsArg = generateIdentifier();
 
-        const callerArguments = [
-            "state",                                       // stateArgument
-            defaultEnvironment.literalLoaderAliasFunction, // popArgument
-            defaultEnvironment.pushFunction,               // pushArgument
-            defaultEnvironment.stateIndex1GetterFunction,  // stateIndex1GetterArgument
-            "bigObjectLikeInstances",                      // bigObjectLikeInstancesArgument
-            "stateRelatedFunctions",                       // stateRelatedFunctionsArgument
-        ];
-
         const instructionAccesibleEnvironment = Object.assign(
             defaultEnvironment,
             {
@@ -252,11 +243,7 @@ export default class InterpreterBuilder {
         // Dispatcher
         interpreterStatements.push(
             ...regeneratorRuntimeTemplate.compile(defaultEnvironment),
-            ...this.compileDispatcherDefinition({
-                ...defaultEnvironment,
-
-                callerArgumentsString: callerArguments.join(","),
-            }),
+            ...this.compileDispatcherDefinition(defaultEnvironment),
             ...new Template(`
                 // Run program
                 {dispatcherFunction}({vmStateObject})
@@ -308,7 +295,7 @@ export default class InterpreterBuilder {
         return unraw(transformedCode);
     }
 
-    private compileWellKnownGlobalObjectsDefinition(env: AdheredDefaultEnvironment): Array<t.Statement> {
+    private compileWellKnownGlobalObjectDefinitions(env: AdheredDefaultEnvironment): Array<t.Statement> {
         return new Template(`
             var {globalObject} = window,
                 {promiseObject} = {globalObject}.Promise;
@@ -316,6 +303,15 @@ export default class InterpreterBuilder {
     }
 
     private compileDispatcherDefinition(env: AdheredDefaultEnvironment): Array<t.Statement> {
+        const callerArguments = [
+            "state",                        // stateArg
+            env.literalLoaderAliasFunction, // popArg
+            env.pushFunction,               // pushArg
+            env.stateIndex1GetterFunction,  // stateIndex1GetterArg
+            "bigObjectLikeInstances",       // bigObjectLikeInstancesArg
+            "stateRelatedFunctions",        // stateRelatedFunctionsArg
+        ];
+
         return new Template(`
             function {dispatcherFunction}(state) {
                 for (var bigObjectLikeInstances = [
@@ -343,7 +339,11 @@ export default class InterpreterBuilder {
                     }
                 }
             }
-        `).compile(env);
+        `).compile({
+            ...env,
+
+            callerArgumentsString: callerArguments.join(", "),
+        });
     }
 
     private compileLiteralLoaderDefinition(env: AdheredDefaultEnvironment): Array<t.Statement> {

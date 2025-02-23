@@ -1,4 +1,4 @@
-import { AddSuffix, InterpreterDefaultEnvironment } from "../Interpreter/Builder/InterpreterDefaultEnvironment";
+import type { AddSuffix, InterpreterDefaultEnvironment } from "../Interpreter/Builder/InterpreterDefaultEnvironment";
 
 export type InstructionArgumentEnvironment = Readonly<AddSuffix<{
     state: string;
