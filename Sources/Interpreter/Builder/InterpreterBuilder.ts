@@ -41,7 +41,6 @@ export default class InterpreterBuilder {
 
         const defaultEnvironment = {
             ...{
-                stringSlicerPropKey: generateIdentifier(),
                 finallyAddressPropKey: generateIdentifier(),
                 currentThisPropKey: generateIdentifier(),
                 stateArrayPropKey: generateIdentifier(),
@@ -49,7 +48,10 @@ export default class InterpreterBuilder {
                 anyObjectPropSubPropKey: generateIdentifier(),
                 parentMemoryPropKey: generateIdentifier(),
                 funcResultObjectPropKey: generateIdentifier(),
-                stringDumpPropKey: generateIdentifier(),
+
+                stringObjectDumpPropKey: generateIdentifier(),
+                stringObjectSlicerPropKey: generateIdentifier(),
+
                 catchAddressPropKey: generateIdentifier(),
                 memoryPropKey: generateIdentifier(),
                 callerPropKey: generateIdentifier(),
@@ -99,7 +101,7 @@ export default class InterpreterBuilder {
         } as const satisfies InterpreterDefaultEnvironment;
 
         interpreterStatements.push(
-            ...this.compileDecodingSection(defaultEnvironment, bytecode),
+            ...this.compileBytecodeDecodingSection(defaultEnvironment, bytecode),
             ...new Template(`
                 function {stateIndex1GetterFunction}(state) {
                     return state.{stateArrayPropKey}[1]
@@ -107,7 +109,7 @@ export default class InterpreterBuilder {
             `).compile(defaultEnvironment),
             ...new Template(`
                 for (var {randomFuncPropKey} = "", {decodedBytecodeLengthAndTrueLengthNumber} = {decodedBytecodeLengthNumber} + ({randomFuncPropKey} + !0)[{literallyLengthString}], {stringObject} = {
-                    {stringDumpPropKey}: ""
+                    {stringObjectDumpPropKey}: ""
                 }, {temp} = 0; {temp} < 28; {temp}++) {randomFuncPropKey} += String.fromCharCode(97 + Math.floor(26 * Math.random()));
             `).compile({
                 ...defaultEnvironment,
@@ -169,17 +171,8 @@ export default class InterpreterBuilder {
                 }
             `).compile(defaultEnvironment),
             ...this.compileLiteralLoaderDefinition(defaultEnvironment),
+            ...this.compileStringDecodingSection(defaultEnvironment),
             ...new Template(`
-                // Load string section
-                {
-                    {stringObject}.{stringSlicerPropKey} = function(start, length) {
-                        return {stringObject}.{stringDumpPropKey}.slice(start, start + length)
-                    }
-                    var {temp} = {decodedBytecodeArray}[{decodedBytecodeLengthNumber} + {randomFuncPropKey}.indexOf(".")] ^ {decodedBytecodeLengthAndTrueLengthNumber},
-                        {temp2} = {decodedBytecodeArray}.splice({temp}, {decodedBytecodeArray}[{temp} + {vmStateObject}.{stateArrayPropKey}[0]] + 2);
-                    {stringObject}.{stringDumpPropKey} = {literalLoaderFunction}({temp2}, {vmStateObject}.{stateArrayPropKey}[1].{stateArrayPropKey}, {literalIdsArray});
-                }
-
                 function {literalLoaderAliasFunction}(state) {
                     return {literalLoaderFunction}({decodedBytecodeArray}, state.{stateArrayPropKey}, {literalIdsArray}, {stringObject})
                 }
@@ -193,12 +186,7 @@ export default class InterpreterBuilder {
                             ($state.{stateArrayPropKey}.length == 1 ? (state.{stateArrayPropKey}[${FUNCTION_RESULT_REG}] = returnValue, null) : 
                                 (state.{stateArrayPropKey} = $state.{stateArrayPropKey}, state.{stateArrayPropKey}[${FUNCTION_RESULT_REG}] = returnValue, void 0));
                 }
-            `).compile({
-                ...defaultEnvironment,
-
-                temp: generateIdentifier(),
-                temp2: generateIdentifier(),
-            }),
+            `).compile(defaultEnvironment),
         );
 
         const stateArg = generateIdentifier();
@@ -383,7 +371,7 @@ export default class InterpreterBuilder {
             `   if (result === literalIds[${randomizedLiteralIds.indexOf(LiteralId.Null)}]) return null;`,
             `
                 if (result === literalIds[${randomizedLiteralIds.indexOf(LiteralId.StoreOrLoadStr)}]) {
-                    if (stringObject != null && stringObject.{stringSlicerPropKey}) return stringObject.{stringSlicerPropKey}(bytecode[vmState[0]++], bytecode[vmState[0]++]);
+                    if (stringObject != null && stringObject.{stringObjectSlicerPropKey}) return stringObject.{stringObjectSlicerPropKey}(bytecode[vmState[0]++], bytecode[vmState[0]++]);
                     for (var str = '', length = bytecode[vmState[0]++], index = 0; index < length; index++) {
                         var charCode = bytecode[vmState[0]++];
                         str += String.fromCharCode(charCode & 0xFFFFFFC0 | charCode * 39 & 0x3F);
@@ -408,7 +396,7 @@ export default class InterpreterBuilder {
         `).compile(env);
     }
 
-    private compileDecodingSection(env: AdheredDefaultEnvironment, bytecode: Bytecode): Array<t.Statement> {
+    private compileBytecodeDecodingSection(env: AdheredDefaultEnvironment, bytecode: Bytecode): Array<t.Statement> {
         const table = BytecodeTranscodingProvider.table,
             radix = BytecodeTranscodingProvider.radix;
 
@@ -431,5 +419,26 @@ export default class InterpreterBuilder {
                 }
             ),
         ];
+    }
+
+    private compileStringDecodingSection(env: AdheredDefaultEnvironment): Array<t.Statement> {
+        // Or just recive exists generateIdentifier with parameter?
+        const generateIdentifier = this.variableGenerator.generateIdentifier.bind(this.variableGenerator);
+
+        return new Template(`
+            {
+                {stringObject}.{stringObjectSlicerPropKey} = function(start, length) {
+                    return {stringObject}.{stringObjectDumpPropKey}.slice(start, start + length)
+                }
+                var {temp} = {decodedBytecodeArray}[{decodedBytecodeLengthNumber} + {randomFuncPropKey}.indexOf(".")] ^ {decodedBytecodeLengthAndTrueLengthNumber},
+                    {temp2} = {decodedBytecodeArray}.splice({temp}, {decodedBytecodeArray}[{temp} + {vmStateObject}.{stateArrayPropKey}[0]] + 2);
+                {stringObject}.{stringObjectDumpPropKey} = {literalLoaderFunction}({temp2}, {vmStateObject}.{stateArrayPropKey}[1].{stateArrayPropKey}, {literalIdsArray});
+            }
+        `).compile({
+            ...env,
+
+            temp: generateIdentifier(),
+            temp2: generateIdentifier(),
+        });
     }
 }

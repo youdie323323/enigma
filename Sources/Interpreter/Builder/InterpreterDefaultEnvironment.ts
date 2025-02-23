@@ -17,8 +17,8 @@ export type PropertyKeyEnvironment = AddSuffix<{
     memory: string;
     caller: string;
 
-    stringDump: string;
-    stringSlicer: string;
+    stringObjectDump: string;
+    stringObjectSlicer: string;
 
     catchAddress: string;
     finallyAddress: string;
