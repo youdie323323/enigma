@@ -117,7 +117,7 @@ export default class InterpreterBuilder {
         );
 
         interpreterStatements.push(
-            ...this.compileWellKnownGlobalObjects(defaultEnvironment),
+            ...this.compileWellKnownGlobalObjectsDefinition(defaultEnvironment),
         );
 
         interpreterStatements.push(
@@ -264,7 +264,7 @@ export default class InterpreterBuilder {
         // Dispatcher
         interpreterStatements.push(
             ...regeneratorRuntimeTemplate.compile(defaultEnvironment),
-            ...this.compileDispatcher({
+            ...this.compileDispatcherDefinition({
                 ...defaultEnvironment,
 
                 callerArgumentsString: callerArguments.join(","),
@@ -320,7 +320,14 @@ export default class InterpreterBuilder {
         return unraw(transformedCode);
     }
 
-    private compileDispatcher(env: AdheredDefaultEnvironment): Array<t.Statement> {
+    private compileWellKnownGlobalObjectsDefinition(env: AdheredDefaultEnvironment): Array<t.Statement> {
+        return new Template(`
+            var {globalObject} = window,
+                {promiseObject} = {globalObject}.Promise;
+        `).compile(env);
+    }
+
+    private compileDispatcherDefinition(env: AdheredDefaultEnvironment): Array<t.Statement> {
         return new Template(`
             function {dispatcherFunction}(state) {
                 for (var bigObjectLikeInstances = [
@@ -424,12 +431,5 @@ export default class InterpreterBuilder {
                 }
             ),
         ];
-    }
-
-    private compileWellKnownGlobalObjects(env: AdheredDefaultEnvironment): Array<t.Statement> {
-        return new Template(`
-            var {globalObject} = window,
-                {promiseObject} = {globalObject}.Promise;
-        `).compile(env);
     }
 }
