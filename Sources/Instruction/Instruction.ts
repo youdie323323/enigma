@@ -1,6 +1,6 @@
 import { OperatorCode } from "../Compiler/CompilerOperatorCode";
 import Template from "../Interpreter/Builder/Templates/Template";
-import { InstructionAccesibleEnvironment } from "./InstructionAccesibleEnvironment";
+import type { InstructionAccesibleEnvironment } from "./InstructionAccesibleEnvironment";
 
 export default interface Instruction {
     /**

@@ -9,7 +9,7 @@ import {
 import Template from "../Interpreter/Builder/Templates/Template";
 import Instruction from "./";
 import * as t from '@babel/types';
-import { InstructionAccesibleEnvironment } from "./InstructionAccesibleEnvironment";
+import type { InstructionAccesibleEnvironment } from "./InstructionAccesibleEnvironment";
 
 /**
  * Define instruction for each opcodes.

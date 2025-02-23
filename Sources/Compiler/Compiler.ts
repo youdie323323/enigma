@@ -184,9 +184,6 @@ export default class Compiler {
 
   /**
    * Convert opcode/literal id to compiler intermediate representation.
-   * 
-   * @param opcodeLike -
-   * @returns 
    */
   @Memoize()
   private createOp(opcodeLike: OpcodeLike): IROpcode {

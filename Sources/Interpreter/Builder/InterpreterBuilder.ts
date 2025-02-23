@@ -9,8 +9,8 @@ import BytecodeTranscoderProvider, { shuffle } from "./Bytecode/BytecodeTranscod
 import unraw from "unraw";
 import { type Bytecode } from "./Bytecode/Bytecode";
 import { FUNCTION_RESULT_REG } from "../../Compiler/CompilerOperatorCode";
-import { ArrayVariableEnvironment, FunctionVariableEnvironment, InterpreterDefaultEnvironment, NumberVariableEnvironment, ObjectVariableEnvironment, PropertyKeyEnvironment, StringVariableEnvironment } from "./InterpreterDefaultEnvironment";
-import { InstructionAccesibleEnvironment, InstructionArgumentEnvironment } from "../../Instruction/InstructionAccesibleEnvironment";
+import type { ArrayVariableEnvironment, FunctionVariableEnvironment, InterpreterDefaultEnvironment, NumberVariableEnvironment, ObjectVariableEnvironment, PropertyKeyEnvironment, StringVariableEnvironment } from "./InterpreterDefaultEnvironment";
+import type { InstructionAccesibleEnvironment, InstructionArgumentEnvironment } from "../../Instruction/InstructionAccesibleEnvironment";
 import { LiteralId } from "../../Compiler/CompilerLiteralId";
 
 const LICENSE_PATTERN = /(?:^[!@]|^@(?:preserve|license|copyright)|^\s*(?:MIT|MPL|GPL|LGPL|BSD|ISC|Apache|UNLICENSED)\b|\([Cc]\)|[Ll]icen[cs]e|[Cc]opyright|\u00A9)/m;
