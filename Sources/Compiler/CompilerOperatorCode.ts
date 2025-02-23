@@ -1,5 +1,5 @@
 import { createRegister, type Register } from "../Compiler/Register/Register";
-import { shuffle } from "../Interpreter/Builder/Bytecode/BytecodeTranscoderProvider";
+import { shuffle } from "../Interpreter/Builder/Bytecode/BytecodeTranscodingProvider";
 
 export const NUM_OP_CODES = 61 + 1;
 export type NumOpCodes = 62;

@@ -4,7 +4,6 @@ import babelTraverse from '@babel/traverse';
 import { traverse as customTraverse } from './ParserTraverse';
 import { type BabelFileResult, type TransformOptions, transformSync } from "@babel/core";
 import UniqueIdentifier from '../CompilerUniqueIdentifier';
-import generate from '@babel/generator';
 
 interface BaseNode {
   declarations: Set<string>;
@@ -41,11 +40,11 @@ const babelOptions: TransformOptions = {
       modules: "commonjs",
     }],
     ["minify", {
-      "mangle": false,
+      mangle: false,
       // Unsafe
       // console.log(Number(0xffffffffn) | 0)
       // This throws error
-      "typeConstructors": false,
+      typeConstructors: false,
     }],
   ].reverse(),
   code: true,
@@ -59,7 +58,7 @@ const babelOptions: TransformOptions = {
 const transformCode = (code: string): BabelFileResult => transformSync(code, babelOptions);
 
 export default class Parser {
-  constructor(private uniqueId: UniqueIdentifier) { }
+  constructor(private uniqueId: UniqueIdentifier) { };
 
   /**
    * Compile code into compilable blocks.

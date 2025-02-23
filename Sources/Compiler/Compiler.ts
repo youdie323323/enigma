@@ -11,7 +11,7 @@ import type { IR, IRNumericalData, IRLabel, IROpcode, IRReference, IRStringData,
 import { labelSymbol, referenceSymbol, opcodeSymbol, stringDataSymbol, numericalDataSymbol } from './CompilerIntermediateRepresentation';
 import { createRegister, type Register, registerToNumber } from './Register/Register';
 import { type Bytecode } from '../Interpreter/Builder/Bytecode/Bytecode';
-import { shuffle } from '../Interpreter/Builder/Bytecode/BytecodeTranscoderProvider';
+import { shuffle } from '../Interpreter/Builder/Bytecode/BytecodeTranscodingProvider';
 import {
   isFiniteLikeCallOperatorCodeArgumentCounts,
   getFiniteLikeCallOperatorCode,

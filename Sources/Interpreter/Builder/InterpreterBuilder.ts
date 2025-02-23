@@ -5,7 +5,7 @@ import * as t from '@babel/types';
 import { transformSync } from "@babel/core";
 import regeneratorRuntimeTemplate from "./Templates/RegeneratorRuntime";
 import { compileASTInstructionHandlers } from "../../Instruction";
-import BytecodeTranscoderProvider, { shuffle } from "./Bytecode/BytecodeTranscoderProvider";
+import BytecodeTranscodingProvider, { shuffle } from "./Bytecode/BytecodeTranscodingProvider";
 import unraw from "unraw";
 import { type Bytecode } from "./Bytecode/Bytecode";
 import { FUNCTION_RESULT_REG } from "../../Compiler/CompilerOperatorCode";
@@ -15,10 +15,15 @@ import { LiteralId } from "../../Compiler/CompilerLiteralId";
 
 const LICENSE_PATTERN = /(?:^[!@]|^@(?:preserve|license|copyright)|^\s*(?:MIT|MPL|GPL|LGPL|BSD|ISC|Apache|UNLICENSED)\b|\([Cc]\)|[Ll]icen[cs]e|[Cc]opyright|\u00A9)/m;
 
+type AdheredDefaultEnvironment = InterpreterDefaultEnvironment & Partial<TemplateVariables>;
+
 /**
  * Class responsible for building a JavaScript interpreter from bytecode.
  */
 export default class InterpreterBuilder {
+    // AST compiler methods
+    [key: `compile${Capitalize<string>}`]: (env: AdheredDefaultEnvironment, ...args: ReadonlyArray<any>) => Array<t.Statement>;
+
     private variableGenerator: VariableGenerator = new VariableGenerator();
 
     /**
@@ -30,7 +35,7 @@ export default class InterpreterBuilder {
     public async build(bytecode: Bytecode): Promise<string> {
         this.variableGenerator.reset();
 
-        const programNodes: Array<t.Statement> = [];
+        const interpreterStatements: Array<t.Statement> = new Array();
 
         const generateIdentifier = this.variableGenerator.generateIdentifier.bind(this.variableGenerator);
 
@@ -93,73 +98,17 @@ export default class InterpreterBuilder {
             } satisfies ObjectVariableEnvironment,
         } as const satisfies InterpreterDefaultEnvironment;
 
-        const randomizedLiteralIds: Array<LiteralId> = shuffle([
-            LiteralId.Null,
-            LiteralId.StoreOrLoadStr,
-            LiteralId.Num,
-            LiteralId.True,
-            LiteralId.False,
-            LiteralId.FakePlaceholder,
-        ]);
-
-        const randomizedLiteralBranches = shuffle([
-            `if (result !== literalIds[${randomizedLiteralIds.indexOf(LiteralId.FakePlaceholder)}]) {`,
-            `
-                if (result === literalIds[${randomizedLiteralIds.indexOf(LiteralId.Num)}]) {
-                    var high = bytecode[vmState[0]++],
-                        low = bytecode[vmState[0]++],
-                        sign = high & 2147483648 ? -1 : 1,
-                        exponent = (high & 2146435072) >> 20,
-                        mantissa = (high & 1048575) * Math.pow(2, 32) + (low < 0 ? low + Math.pow(2, 32) : low);
-                    return exponent === 2047 ? mantissa ? NaN : sign * (1 / 0) : (exponent !== 0 ? mantissa += Math.pow(2, 52) : exponent++, sign * mantissa * Math.pow(2, exponent - 1075));
-                }
-            `,
-            `   if (result === literalIds[${randomizedLiteralIds.indexOf(LiteralId.Null)}]) return null;`,
-            `
-                if (result === literalIds[${randomizedLiteralIds.indexOf(LiteralId.StoreOrLoadStr)}]) {
-                    if (stringObject != null && stringObject.{stringSlicerPropKey}) return stringObject.{stringSlicerPropKey}(bytecode[vmState[0]++], bytecode[vmState[0]++]);
-                    for (var str = '', length = bytecode[vmState[0]++], index = 0; index < length; index++) {
-                        var charCode = bytecode[vmState[0]++];
-                        str += String.fromCharCode(charCode & 0xFFFFFFC0 | charCode * 39 & 0x3F);
-                    }
-                    return str;
-                }
-            `,
-            `   if (result === literalIds[${randomizedLiteralIds.indexOf(LiteralId.True)}]) return !0;`,
-            `   if (result === literalIds[${randomizedLiteralIds.indexOf(LiteralId.False)}]) return !1;`,
-        ]).concat(
-            "   return vmState[result >> 5]",
-            "}"
-        );
-
-        const encodingTable = BytecodeTranscoderProvider.table,
-            encodingRadix = BytecodeTranscoderProvider.radix;
-
-        programNodes.push(
-            ...BytecodeTranscoderProvider.decoder.compile(defaultEnvironment),
+        interpreterStatements.push(
+            ...this.compileDecodingSection(defaultEnvironment, bytecode),
             ...new Template(`
-            var {bytecodeString} = "{encoded}",
-                {literallyLengthString} = "length",
-                {decodedBytecodeArray} = {decoderFunction}({bytecodeString}, "{table}", {radix}),
-                {decodedBytecodeLengthNumber} = {decodedBytecodeArray}[{literallyLengthString}];
-            `).compile(
-                {
-                    ...defaultEnvironment,
-
-                    encoded: BytecodeTranscoderProvider.encode(bytecode, encodingTable, encodingRadix),
-                    table: encodingTable,
-                    radix: encodingRadix,
+                function {stateIndex1GetterFunction}(state) {
+                    return state.{stateArrayPropKey}[1]
                 }
-            ),
-            ...new Template(`
-            function {stateIndex1GetterFunction}(state) {
-                return state.{stateArrayPropKey}[1]
-            }
             `).compile(defaultEnvironment),
             ...new Template(`
-            for (var {randomFuncPropKey} = "", {decodedBytecodeLengthAndTrueLengthNumber} = {decodedBytecodeLengthNumber} + ({randomFuncPropKey} + !0)[{literallyLengthString}], {stringObject} = {
-                {stringDumpPropKey}: ""
-            }, {temp} = 0; {temp} < 28; {temp}++) {randomFuncPropKey} += String.fromCharCode(97 + Math.floor(26 * Math.random()));
+                for (var {randomFuncPropKey} = "", {decodedBytecodeLengthAndTrueLengthNumber} = {decodedBytecodeLengthNumber} + ({randomFuncPropKey} + !0)[{literallyLengthString}], {stringObject} = {
+                    {stringDumpPropKey}: ""
+                }, {temp} = 0; {temp} < 28; {temp}++) {randomFuncPropKey} += String.fromCharCode(97 + Math.floor(26 * Math.random()));
             `).compile({
                 ...defaultEnvironment,
 
@@ -167,98 +116,89 @@ export default class InterpreterBuilder {
             }),
         );
 
-        programNodes.push(
-            ...new Template(`
-            var {globalObject} = window,
-                {promiseObject} = {globalObject}.Promise;
-            `).compile(defaultEnvironment),
+        interpreterStatements.push(
+            ...this.compileWellKnownGlobalObjects(defaultEnvironment),
         );
 
-        programNodes.push(
+        interpreterStatements.push(
             ...new Template(`
-            function {loadRegisterFunction}(state) {
-                return {decodedBytecodeArray}[state.{stateArrayPropKey}[0]++] >> 5
-            }
-            
-            function {vmStateFunction}() {
-                // One for instruction pointer
-                var mainState = [1, {
-                    {currentThisPropKey}: {globalObject},
-                    {callerPropKey}: null,
-                    {memoryPropKey}: [],
-                    {stateArrayPropKey}: [0],
-                    {parentMemoryPropKey}: void 0,
-                }, void 0];
-                return {
-                    {stateArrayPropKey}: mainState,
-                    {errorObjectPropKey}: void 0,
+                function {loadRegisterFunction}(state) {
+                    return {decodedBytecodeArray}[state.{stateArrayPropKey}[0]++] >> 5
                 }
-            }
-            
-            function {exceptionHandlerFunction}(state, err) {
-                for (; ;) {
-                    var nextState = state.{stateArrayPropKey}[1];
-
-                    // Throw err if context is nullish (theres no valid try-catch)
-                    if (!nextState) throw err;
-
-                    // Found try-catch, set error then jump to catch address
-                    if (nextState.{catchAddressPropKey}) {
-                        state.{errorObjectPropKey} = {
-                          {anyObjectPropSubPropKey}: err,
-                        }, state.{stateArrayPropKey}[0] = nextState.{catchAddressPropKey};
-                        return;
+                
+                function {vmStateFunction}() {
+                    // One for instruction pointer
+                    var mainState = [1, {
+                        {currentThisPropKey}: {globalObject},
+                        {callerPropKey}: null,
+                        {memoryPropKey}: [],
+                        {stateArrayPropKey}: [0],
+                        {parentMemoryPropKey}: void 0,
+                    }, void 0];
+                    return {
+                        {stateArrayPropKey}: mainState,
+                        {errorObjectPropKey}: void 0,
                     }
-                    
-                    // Traverse state and find try-catch
-                    state.{stateArrayPropKey} = nextState.{stateArrayPropKey};
                 }
-            }
-            
-            // Global vm state, which represents "Program"
-            var {vmStateObject} = {vmStateFunction}();
-
-            function {pushFunction}(state, elem) {
-                state.{stateArrayPropKey}[{loadRegisterFunction}(state)] = elem
-            }
-            
-            // Literal loader section
-            var {literalLoaderFunction} = function (bytecode, vmState, literalIds, stringObject) {
-                    var result = bytecode[vmState[0]++];
-                    if (result & 1) return result >> 1;
-                    ${randomizedLiteralBranches.join("\n")}
-                }, 
-                {literalIdsArray} = ${JSON.stringify(randomizedLiteralIds)};
-
-            // Load string section
-            {
-                {stringObject}.{stringSlicerPropKey} = function(start, length) {
-                    return {stringObject}.{stringDumpPropKey}.slice(start, start + length)
+                
+                function {exceptionHandlerFunction}(state, err) {
+                    for (; ;) {
+                        var nextState = state.{stateArrayPropKey}[1];
+    
+                        // Throw err if context is nullish (theres no valid try-catch)
+                        if (!nextState) throw err;
+    
+                        // Found try-catch, set error then jump to catch address
+                        if (nextState.{catchAddressPropKey}) {
+                            state.{errorObjectPropKey} = {
+                              {anyObjectPropSubPropKey}: err,
+                            }, state.{stateArrayPropKey}[0] = nextState.{catchAddressPropKey};
+                            return;
+                        }
+                        
+                        // Traverse state and find try-catch
+                        state.{stateArrayPropKey} = nextState.{stateArrayPropKey};
+                    }
                 }
-                var {temp} = {decodedBytecodeArray}[{decodedBytecodeLengthNumber} + {randomFuncPropKey}.indexOf(".")] ^ {decodedBytecodeLengthAndTrueLengthNumber},
-                    {temp2} = {decodedBytecodeArray}.splice({temp}, {decodedBytecodeArray}[{temp} + {vmStateObject}.{stateArrayPropKey}[0]] + 2);
-                {stringObject}.{stringDumpPropKey} = {literalLoaderFunction}({temp2}, {vmStateObject}.{stateArrayPropKey}[1].{stateArrayPropKey}, {literalIdsArray});
-            }
+                
+                // Global vm state, which represents "Program"
+                var {vmStateObject} = {vmStateFunction}();
+    
+                function {pushFunction}(state, elem) {
+                    state.{stateArrayPropKey}[{loadRegisterFunction}(state)] = elem
+                }
+            `).compile(defaultEnvironment),
+            ...this.compileLiteralLoaderDefinition(defaultEnvironment),
+            ...new Template(`
+                // Load string section
+                {
+                    {stringObject}.{stringSlicerPropKey} = function(start, length) {
+                        return {stringObject}.{stringDumpPropKey}.slice(start, start + length)
+                    }
+                    var {temp} = {decodedBytecodeArray}[{decodedBytecodeLengthNumber} + {randomFuncPropKey}.indexOf(".")] ^ {decodedBytecodeLengthAndTrueLengthNumber},
+                        {temp2} = {decodedBytecodeArray}.splice({temp}, {decodedBytecodeArray}[{temp} + {vmStateObject}.{stateArrayPropKey}[0]] + 2);
+                    {stringObject}.{stringDumpPropKey} = {literalLoaderFunction}({temp2}, {vmStateObject}.{stateArrayPropKey}[1].{stateArrayPropKey}, {literalIdsArray});
+                }
 
-            function {literalLoaderAliasFunction}(state) {
-                return {literalLoaderFunction}({decodedBytecodeArray}, state.{stateArrayPropKey}, {literalIdsArray}, {stringObject})
-            }
+                function {literalLoaderAliasFunction}(state) {
+                    return {literalLoaderFunction}({decodedBytecodeArray}, state.{stateArrayPropKey}, {literalIdsArray}, {stringObject})
+                }
 
-            function {bytecodeReturnFunction}(state, returnValue) {
-                var $state = {stateIndex1GetterFunction}(state);
-                return $state.{funcResultObjectPropKey} = {
-                    {anyObjectPropSubPropKey}: returnValue,
-                }, 
-                    $state.{finallyAddressPropKey} ? state.{stateArrayPropKey}[0] = $state.{finallyAddressPropKey} : 
-                        ($state.{stateArrayPropKey}.length == 1 ? (state.{stateArrayPropKey}[${FUNCTION_RESULT_REG}] = returnValue, null) : 
-                            (state.{stateArrayPropKey} = $state.{stateArrayPropKey}, state.{stateArrayPropKey}[${FUNCTION_RESULT_REG}] = returnValue, void 0));
-            }
+                function {bytecodeReturnFunction}(state, returnValue) {
+                    var $state = {stateIndex1GetterFunction}(state);
+                    return $state.{funcResultObjectPropKey} = {
+                        {anyObjectPropSubPropKey}: returnValue,
+                    }, 
+                        $state.{finallyAddressPropKey} ? state.{stateArrayPropKey}[0] = $state.{finallyAddressPropKey} : 
+                            ($state.{stateArrayPropKey}.length == 1 ? (state.{stateArrayPropKey}[${FUNCTION_RESULT_REG}] = returnValue, null) : 
+                                (state.{stateArrayPropKey} = $state.{stateArrayPropKey}, state.{stateArrayPropKey}[${FUNCTION_RESULT_REG}] = returnValue, void 0));
+                }
             `).compile({
                 ...defaultEnvironment,
 
                 temp: generateIdentifier(),
                 temp2: generateIdentifier(),
-            })
+            }),
         );
 
         const stateArg = generateIdentifier();
@@ -301,7 +241,7 @@ export default class InterpreterBuilder {
             ] satisfies Array<t.Identifier>,
         );
 
-        programNodes.push(
+        interpreterStatements.push(
             t.variableDeclaration(
                 "var",
                 [
@@ -313,25 +253,25 @@ export default class InterpreterBuilder {
             ),
         );
 
-        programNodes.push(
+        interpreterStatements.push(
             ...new Template(`
-            function {popFunction}(state) {
-                return state.{stateArrayPropKey}[{decodedBytecodeArray}[state.{stateArrayPropKey}[0]++] >> 5];
-            }
+                function {popFunction}(state) {
+                    return state.{stateArrayPropKey}[{decodedBytecodeArray}[state.{stateArrayPropKey}[0]++] >> 5];
+                }
             `).compile(defaultEnvironment),
         );
 
         // Dispatcher
-        programNodes.push(
+        interpreterStatements.push(
             ...regeneratorRuntimeTemplate.compile(defaultEnvironment),
-            ...this.compileDispatcherAST({
+            ...this.compileDispatcher({
                 ...defaultEnvironment,
 
                 callerArgumentsString: callerArguments.join(","),
             }),
             ...new Template(`
-            // Run program
-            {dispatcherFunction}({vmStateObject})
+                // Run program
+                {dispatcherFunction}({vmStateObject})
             `).compile(defaultEnvironment),
         );
 
@@ -342,7 +282,7 @@ export default class InterpreterBuilder {
                         t.functionExpression(
                             null,
                             [],
-                            t.blockStatement(programNodes),
+                            t.blockStatement(interpreterStatements),
                         ),
                         [],
                     ),
@@ -380,7 +320,7 @@ export default class InterpreterBuilder {
         return unraw(transformedCode);
     }
 
-    private compileDispatcherAST(env: TemplateVariables): Array<t.Statement> {
+    private compileDispatcher(env: AdheredDefaultEnvironment): Array<t.Statement> {
         return new Template(`
             function {dispatcherFunction}(state) {
                 for (var bigObjectLikeInstances = [
@@ -408,6 +348,88 @@ export default class InterpreterBuilder {
                     }
                 }
             }
+        `).compile(env);
+    }
+
+    private compileLiteralLoaderDefinition(env: AdheredDefaultEnvironment): Array<t.Statement> {
+        const randomizedLiteralIds: Array<LiteralId> = shuffle([
+            LiteralId.Null,
+            LiteralId.StoreOrLoadStr,
+            LiteralId.Num,
+            LiteralId.True,
+            LiteralId.False,
+            LiteralId.FakePlaceholder,
+        ]);
+
+        const randomizedLiteralBranches = shuffle([
+            `if (result !== literalIds[${randomizedLiteralIds.indexOf(LiteralId.FakePlaceholder)}]) {`,
+            `
+                if (result === literalIds[${randomizedLiteralIds.indexOf(LiteralId.Num)}]) {
+                    var high = bytecode[vmState[0]++],
+                        low = bytecode[vmState[0]++],
+                        sign = high & 2147483648 ? -1 : 1,
+                        exponent = (high & 2146435072) >> 20,
+                        mantissa = (high & 1048575) * Math.pow(2, 32) + (low < 0 ? low + Math.pow(2, 32) : low);
+                    return exponent === 2047 ? mantissa ? NaN : sign * (1 / 0) : (exponent !== 0 ? mantissa += Math.pow(2, 52) : exponent++, sign * mantissa * Math.pow(2, exponent - 1075));
+                }
+            `,
+            `   if (result === literalIds[${randomizedLiteralIds.indexOf(LiteralId.Null)}]) return null;`,
+            `
+                if (result === literalIds[${randomizedLiteralIds.indexOf(LiteralId.StoreOrLoadStr)}]) {
+                    if (stringObject != null && stringObject.{stringSlicerPropKey}) return stringObject.{stringSlicerPropKey}(bytecode[vmState[0]++], bytecode[vmState[0]++]);
+                    for (var str = '', length = bytecode[vmState[0]++], index = 0; index < length; index++) {
+                        var charCode = bytecode[vmState[0]++];
+                        str += String.fromCharCode(charCode & 0xFFFFFFC0 | charCode * 39 & 0x3F);
+                    }
+                    return str;
+                }
+            `,
+            `   if (result === literalIds[${randomizedLiteralIds.indexOf(LiteralId.True)}]) return !0;`,
+            `   if (result === literalIds[${randomizedLiteralIds.indexOf(LiteralId.False)}]) return !1;`,
+        ]).concat(
+            "   return vmState[result >> 5]",
+            "}"
+        );
+
+        return new Template(`
+            var {literalLoaderFunction} = function (bytecode, vmState, literalIds, stringObject) {
+                    var result = bytecode[vmState[0]++];
+                    if (result & 1) return result >> 1;
+                    ${randomizedLiteralBranches.join("\n")}
+                }, 
+                {literalIdsArray} = ${JSON.stringify(randomizedLiteralIds)};
+        `).compile(env);
+    }
+
+    private compileDecodingSection(env: AdheredDefaultEnvironment, bytecode: Bytecode): Array<t.Statement> {
+        const table = BytecodeTranscodingProvider.table,
+            radix = BytecodeTranscodingProvider.radix;
+
+        const encodedBytecode = BytecodeTranscodingProvider.encode(bytecode, table, radix);
+
+        return [
+            ...BytecodeTranscodingProvider.decoder.compile(env),
+            ...new Template(`
+                var {bytecodeString} = "{encodedBytecode}",
+                    {literallyLengthString} = "length",
+                    {decodedBytecodeArray} = {decoderFunction}({bytecodeString}, "{table}", {radix}),
+                    {decodedBytecodeLengthNumber} = {decodedBytecodeArray}[{literallyLengthString}];
+            `).compile(
+                {
+                    ...env,
+
+                    encodedBytecode,
+                    table,
+                    radix,
+                }
+            ),
+        ];
+    }
+
+    private compileWellKnownGlobalObjects(env: AdheredDefaultEnvironment): Array<t.Statement> {
+        return new Template(`
+            var {globalObject} = window,
+                {promiseObject} = {globalObject}.Promise;
         `).compile(env);
     }
 }

@@ -8,7 +8,7 @@ export const shuffle = <T>(array: T[]): T[] => {
     return array.toSorted(() => Math.random() - 0.5);
 }
 
-export default class BytecodeTranscoderProvider {
+export default class BytecodeTranscodingProvider {
     private static readonly REPLACEABLE_CHARSET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static readonly UNICODE_CHARACTERS: Record<string, string> = {
         A: 'Α',
@@ -98,10 +98,10 @@ export default class BytecodeTranscoderProvider {
         [Category.Thaana]: 180,
     };
     private static readonly NON_BASIC_TABLE_CATEGORIES_TOTAL_WEIGHT =
-        Object.values(BytecodeTranscoderProvider.NON_BASIC_TABLE_CATEGORIES_WEIGHTS).reduce((sum, w) => sum + w, 0);
+        Object.values(BytecodeTranscodingProvider.NON_BASIC_TABLE_CATEGORIES_WEIGHTS).reduce((sum, w) => sum + w, 0);
 
     private static replaceCharWithUnicode(str: string): string {
-        return BytecodeTranscoderProvider.UNICODE_CHARACTERS[str] || str;
+        return BytecodeTranscodingProvider.UNICODE_CHARACTERS[str] || str;
     }
 
     private static replaceCharAtIndex(str: string, index: number, char: string) {
@@ -110,10 +110,10 @@ export default class BytecodeTranscoderProvider {
     }
 
     private static get randomNonBasicCategory(): Category {
-        const random = Math.random() * BytecodeTranscoderProvider.NON_BASIC_TABLE_CATEGORIES_TOTAL_WEIGHT;
+        const random = Math.random() * BytecodeTranscodingProvider.NON_BASIC_TABLE_CATEGORIES_TOTAL_WEIGHT;
 
         let cumulative = 0;
-        for (const [category, weight] of Object.entries(BytecodeTranscoderProvider.NON_BASIC_TABLE_CATEGORIES_WEIGHTS)) {
+        for (const [category, weight] of Object.entries(BytecodeTranscodingProvider.NON_BASIC_TABLE_CATEGORIES_WEIGHTS)) {
             cumulative += weight;
             if (random <= cumulative) {
                 return category as Category;
@@ -130,21 +130,21 @@ export default class BytecodeTranscoderProvider {
      * @deprecated Use generateDistortedTable.
      */
     private static oldGenerateDistortedTable(): string {
-        const index = Math.floor(Math.random() * BytecodeTranscoderProvider.REPLACEABLE_CHARSET.length);
+        const index = Math.floor(Math.random() * BytecodeTranscodingProvider.REPLACEABLE_CHARSET.length);
 
-        return BytecodeTranscoderProvider.replaceCharAtIndex(
-            BytecodeTranscoderProvider.REPLACEABLE_CHARSET,
+        return BytecodeTranscodingProvider.replaceCharAtIndex(
+            BytecodeTranscodingProvider.REPLACEABLE_CHARSET,
             index,
-            BytecodeTranscoderProvider.replaceCharWithUnicode(BytecodeTranscoderProvider.REPLACEABLE_CHARSET[index]),
+            BytecodeTranscodingProvider.replaceCharWithUnicode(BytecodeTranscodingProvider.REPLACEABLE_CHARSET[index]),
         ) + "0123456789";
     }
 
     private static generateDistortedTable(): string {
-        const duplicationCheckerSet: Set<string> = new Set(BytecodeTranscoderProvider.LATIN_BASIC_TABLE);
+        const duplicationCheckerSet: Set<string> = new Set(BytecodeTranscodingProvider.LATIN_BASIC_TABLE);
 
-        const nonBasicChars = Array.from({ length: BytecodeTranscoderProvider.randomNonBasicCharLength }, function retry() {
+        const nonBasicChars = Array.from({ length: BytecodeTranscodingProvider.randomNonBasicCharLength }, function retry() {
             const randomNonBasicStr = generateRandomStringFromCategory(
-                BytecodeTranscoderProvider.randomNonBasicCategory,
+                BytecodeTranscodingProvider.randomNonBasicCategory,
             );
 
             if (duplicationCheckerSet.has(randomNonBasicStr)) {
@@ -155,17 +155,17 @@ export default class BytecodeTranscoderProvider {
             return randomNonBasicStr;
         });
 
-        const combinedChars = BytecodeTranscoderProvider.LATIN_BASIC_TABLE.concat(nonBasicChars);
+        const combinedChars = BytecodeTranscodingProvider.LATIN_BASIC_TABLE.concat(nonBasicChars);
 
         return shuffle(combinedChars).join('');
     }
 
     public static get table(): string {
-        return BytecodeTranscoderProvider.generateDistortedTable();
+        return BytecodeTranscodingProvider.generateDistortedTable();
     }
 
     public static get radix(): number {
-        return Math.floor(Math.random() * ((BytecodeTranscoderProvider.MAX_RADIX + 1) - BytecodeTranscoderProvider.MIN_RADIX)) + BytecodeTranscoderProvider.MIN_RADIX;
+        return Math.floor(Math.random() * ((BytecodeTranscodingProvider.MAX_RADIX + 1) - BytecodeTranscodingProvider.MIN_RADIX)) + BytecodeTranscodingProvider.MIN_RADIX;
     }
 
     public static encode(
@@ -196,7 +196,7 @@ export default class BytecodeTranscoderProvider {
         });
 
         deepEqual(
-            BytecodeTranscoderProvider.decode(encodedString, table, radix),
+            BytecodeTranscodingProvider.decode(encodedString, table, radix),
             // Do c | 0 as did in decode function
             bytecode.map(c => c | 0),
             "Bytecode encoding checksum failed",
@@ -232,6 +232,6 @@ export default class BytecodeTranscoderProvider {
     }
 
     public static get decoder(): Template {
-        return BytecodeTranscoderProvider.decoderTemplate;
+        return BytecodeTranscodingProvider.decoderTemplate;
     }
 }
