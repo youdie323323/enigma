@@ -4,6 +4,7 @@ import babelTraverse from '@babel/traverse';
 import { traverse as customTraverse } from './ParserTraverse';
 import { type BabelFileResult, type TransformOptions, transformSync } from "@babel/core";
 import UniqueIdentifier from '../CompilerUniqueIdentifier';
+import generate from '@babel/generator';
 
 interface BaseNode {
   declarations: Set<string>;
@@ -71,7 +72,7 @@ export default class Parser {
     babelTraverse(ast, {
       Block(path) {
         const functionDeclarations = [];
-        const reservedFunctionPaths = [];
+        const functionPaths = [];
         const otherStatements = [];
 
         path.traverse({
@@ -80,7 +81,7 @@ export default class Parser {
             const functionParent = innerPath.findParent((p) => p.isBlock());
             if (functionParent && functionParent.isBlock(path.node)) {
               functionDeclarations.push(innerPath.node);
-              reservedFunctionPaths.push(innerPath);
+              functionPaths.push(innerPath);
             }
           },
         });
@@ -91,7 +92,7 @@ export default class Parser {
           }
         });
 
-        reservedFunctionPaths.forEach(p => p && p.remove());
+        functionPaths.forEach(p => p && p.remove());
 
         path.node.body = [...functionDeclarations, ...otherStatements];
       },

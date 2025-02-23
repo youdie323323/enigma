@@ -868,24 +868,23 @@ export default class Compiler {
 
         // TemplateLiteral | BigIntLiteral | DecimalLiteral already converted with plugin
 
-        let regexpData: Array<IR>;
+        let literalData: Array<IR>;
 
         if (t.isRegExpLiteral(expr)) {
-          regexpData = this.createLiteral(expr.pattern).concat(this.createLiteral(expr.flags));
+          literalData = [...this.createLiteral(expr.pattern), ...this.createLiteral(expr.flags)];
         } else if (t.isNumericLiteral(expr) || t.isStringLiteral(expr) || t.isBooleanLiteral(expr)) {
-          regexpData = this.createLiteral(expr.value);
+          literalData = this.createLiteral(expr.value);
         } else if (t.isNullLiteral(expr)) {
-          regexpData = this.createLiteral(null);
+          literalData = this.createLiteral(null);
         } else {
           throw new Error(`Unsupported literal type: ${expr.type}`);
         };
 
-        // Write regexp
         this.writeInstruction(
           t.isRegExpLiteral(expr) ?
             OperatorCode.NewRegExp :
             OperatorCode.SetReg,
-          ...regexpData,
+          ...literalData,
           this.createRegId(literalReg),
         );
 
@@ -1514,7 +1513,7 @@ export default class Compiler {
             ...this.createLiteral("window"),
             this.createRegId(globalReg),
           );
-          
+
           this.writeInstruction(
             OperatorCode.SetValue,
             ...this.createLiteral(this.memoryDictionary.get("GLOBAL")),
@@ -1674,7 +1673,11 @@ export default class Compiler {
         }
 
         case stringDataSymbol: {
-          bytecode.push(LiteralId.StoreOrLoadStr, stringIndexMap.get(inst.data) ?? joinedStringTable.indexOf(inst.data), inst.data.length);
+          bytecode.push(
+            LiteralId.StoreOrLoadStr, 
+            stringIndexMap.get(inst.data) ?? joinedStringTable.indexOf(inst.data), 
+            inst.data.length,
+          );
 
           break;
         }

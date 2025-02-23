@@ -141,3 +141,5 @@ samples/
 dev.output.js
 
 Dist/
+
+ApplicationTest.ts

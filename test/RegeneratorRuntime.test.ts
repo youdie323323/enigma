@@ -106,7 +106,7 @@ describe("Regenerator runtime tests", () => {
     });
     
     describe("Generator tests", () => {
-        test("basic generator should work", async () => {
+        test("Basic generator should work", async () => {
             await executeCode(`
                 function* numberGenerator() {
                     yield 1;
@@ -125,7 +125,7 @@ describe("Regenerator runtime tests", () => {
             expect(window.result).toEqual([1, 2, 3, true]);
         });
     
-        test("generator with for...of should work", async () => {
+        test("Generator with for...of should work", async () => {
             await executeCode(`
                 function* range(start, end) {
                     for (let i = start; i <= end; i++) {
@@ -142,7 +142,7 @@ describe("Regenerator runtime tests", () => {
             expect(window.result).toEqual([1, 2, 3]);
         });
     
-        test("async generator should work", async () => {
+        test("Async generator should work", async () => {
             await executeCode(`
                 async function* asyncNumberGenerator() {
                     yield await Promise.resolve(1);
@@ -164,7 +164,7 @@ describe("Regenerator runtime tests", () => {
             await expect(window.result).resolves.toEqual([1, 2, 3]);
         });
     
-        test("generator with return should work", async () => {
+        test("Generator with return should work", async () => {
             await executeCode(`
                 function* gen() {
                     yield 1;
@@ -183,7 +183,7 @@ describe("Regenerator runtime tests", () => {
             ]);
         });
     
-        test("generator throw should work", async () => {
+        test("Generator throw should work", async () => {
             await executeCode(`
                 function* errorGenerator() {
                     try {
@@ -203,7 +203,7 @@ describe("Regenerator runtime tests", () => {
             expect(window.result).toEqual([1, 'test error']);
         });
     
-        test("generator delegation should work", async () => {
+        test("Generator delegation should work", async () => {
             await executeCode(`
                 function* gen1() {
                     yield 1;
@@ -225,7 +225,7 @@ describe("Regenerator runtime tests", () => {
             expect(window.result).toEqual([1, 2, 3]);
         });
     
-        test("infinite generator with take function should work", async () => {
+        test("Infinite generator with take function should work", async () => {
             await executeCode(`
                 function* fibonacci() {
                     let prev = 0, curr = 1;
