@@ -1,4 +1,4 @@
-[![npm](https://img.shields.io/npm/v/enigma)](https://www.npmjs.com/package/enigma)
+[![npm](https://img.shields.io/npm/v/enigma-vm)](https://www.npmjs.com/package/enigma-vm)
 [![license](https://img.shields.io/github/license/youdie323323/enigma)](https://github.com/youdie323323/enigma/blob/master/LICENSE)
 
 <h1 align="center">$$Ёnigma$$</h1>

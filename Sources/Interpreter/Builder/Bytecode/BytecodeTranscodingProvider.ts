@@ -140,7 +140,9 @@ export default class BytecodeTranscodingProvider {
     }
 
     private static generateDistortedTable(): string {
-        const duplicationCheckerSet: Set<string> = new Set(BytecodeTranscodingProvider.LATIN_BASIC_TABLE);
+        const defaultChars = BytecodeTranscodingProvider.LATIN_BASIC_TABLE;
+
+        const duplicationCheckerSet: Set<string> = new Set(defaultChars);
 
         const nonBasicChars = Array.from({ length: BytecodeTranscodingProvider.randomNonBasicCharLength }, function retry() {
             const randomNonBasicStr = generateRandomStringFromCategory(
@@ -155,7 +157,7 @@ export default class BytecodeTranscodingProvider {
             return randomNonBasicStr;
         });
 
-        const combinedChars = BytecodeTranscodingProvider.LATIN_BASIC_TABLE.concat(nonBasicChars);
+        const combinedChars = defaultChars.concat(nonBasicChars);
 
         return shuffle(combinedChars).join('');
     }
