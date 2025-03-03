@@ -1,5 +1,5 @@
 [![npm](https://img.shields.io/npm/v/enigma-vm)](https://www.npmjs.com/package/enigma-vm)
-[![license](https://img.shields.io/github/license/youdie323323/enigma)](https://github.com/youdie323323/enigma/blob/master/LICENSE)
+[![license](https://img.shields.io/github/license/youdie323323/enigma)](https://github.com/youdie323323/enigma/blob/main/LICENSE)
 
 <h1 align="center">$$Ёnigma$$</h1>
 
