@@ -4,7 +4,7 @@ import {
     ARGUMENTS_REG,
     ARGUMENTS_SPREAD_REG,
     FUNCTION_RESULT_REG,
-    type NumOpCodes
+    type NumOpCodes,
 } from "../Compiler/CompilerOperatorCode";
 import Template from "../Interpreter/Builder/Templates/Template";
 import Instruction from "./";
@@ -24,7 +24,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, void 0);
-            `)
+            `);
         },
     },
     {
@@ -36,7 +36,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, {});
-            `)
+            `);
         },
     },
     {
@@ -48,7 +48,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, []);
-            `)
+            `);
         },
     },
     {
@@ -61,7 +61,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, new Array(${popArg}(${stateArg})));
-            `)
+            `);
         },
     },
     {
@@ -74,7 +74,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -87,7 +87,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, new RegExp(${popArg}(${stateArg}), ${popArg}(${stateArg})));
-            `)
+            `);
         },
     },
     {
@@ -102,7 +102,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${stateIndex1GetterArg}(${stateArg}).${memoryPropKey}[${popArg}(${stateArg})] = void 0
-            `)
+            `);
         },
     },
     {
@@ -117,7 +117,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${stateIndex1GetterArg}(${stateArg}).${memoryPropKey}[${popArg}(${stateArg})] = ${popArg}(${stateArg})
-            `)
+            `);
         },
     },
     {
@@ -139,7 +139,7 @@ export const instructionSet = [
                 return;
               } 
             throw 'ball';
-            `)
+            `);
         },
     },
     {
@@ -160,7 +160,7 @@ export const instructionSet = [
                 return;
               } 
             throw 'ball';
-            `)
+            `);
         },
     },
     {
@@ -193,7 +193,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${stateArg}.${stateArrayPropKey}[0] = ${popArg}(${stateArg})
-            `)
+            `);
         },
     },
     {
@@ -208,7 +208,7 @@ export const instructionSet = [
             return new Template(`
             var $address = ${popArg}(${stateArg});
             ${popArg}(${stateArg}) ? ${stateArg}.${stateArrayPropKey}[0] = $address : $address
-            `)
+            `);
         },
     },
     {
@@ -223,7 +223,7 @@ export const instructionSet = [
             return new Template(`
             var $address = ${popArg}(${stateArg});
             ${popArg}(${stateArg}) ? $address : ${stateArg}.${stateArrayPropKey}[0] = $address
-            `)
+            `);
         },
     },
     {
@@ -281,7 +281,7 @@ export const instructionSet = [
               ${parentMemoryPropKey}: $parentState,
               ${randomFuncPropFuncPropKey}: $targetFunc
             }, ${pushArg}(${stateArg}, $targetFunc)
-            `)
+            `);
         },
     },
     {
@@ -317,7 +317,7 @@ export const instructionSet = [
               }.apply(void 0, $callArgs)];
               for (var $argIndex = 0; $argIndex < $callArgs.length; $argIndex++) ${stateArg}.${stateArrayPropKey}.push($callArgs[$argIndex]);
             } else ${stateArg}.${stateArrayPropKey}[${FUNCTION_RESULT_REG}] = $targetFunc.apply($thisContext, $callArgs)
-            `)
+            `);
         },
     },
     {
@@ -332,14 +332,14 @@ export const instructionSet = [
             var $targetFunc = ${popArg}(${stateArg}),
               $argArray = ${popArg}(${stateArg}).slice();
             $argArray.unshift(void 0), ${pushArg}(${stateArg}, new (Function.bind.apply($targetFunc, $argArray)));
-            `)
+            `);
         },
     },
     {
         opcode: OperatorCode.Term,
         requiredArgs: 0,
         templateFn: function (_: InstructionAccesibleEnvironment): Template {
-            return new Template(`return null`)
+            return new Template(`return null`);
         },
     },
     {
@@ -352,7 +352,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg})[${popArg}(${stateArg})]);
-            `)
+            `);
         },
     },
     {
@@ -364,7 +364,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${popArg}(${stateArg})[${popArg}(${stateArg})] = ${popArg}(${stateArg})
-            `)
+            `);
         },
     },
     {
@@ -377,7 +377,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) in ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -392,7 +392,7 @@ export const instructionSet = [
             var $targetObj = ${popArg}(${stateArg}),
                 $propertyKey = ${popArg}(${stateArg});
             ${pushArg}(${stateArg}, delete $targetObj[$propertyKey]);
-            `)
+            `);
         },
     },
     {
@@ -405,7 +405,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) == ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -418,7 +418,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) != ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -431,7 +431,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) === ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -444,7 +444,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) !== ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -457,7 +457,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) < ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -470,7 +470,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) <= ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -483,7 +483,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) > ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -496,7 +496,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) >= ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -509,7 +509,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) + ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -522,7 +522,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) - ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -535,7 +535,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) * ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -548,7 +548,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) / ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -561,7 +561,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) % ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -574,7 +574,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ~${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -587,7 +587,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) | ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -600,7 +600,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) ^ ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -613,7 +613,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) & ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -626,7 +626,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) << ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -639,7 +639,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) >> ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -652,7 +652,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) >>> ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -665,7 +665,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, !${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -678,7 +678,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${popArg}(${stateArg}) instanceof ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -691,7 +691,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, typeof ${popArg}(${stateArg}));
-            `)
+            `);
         },
     },
     {
@@ -706,7 +706,7 @@ export const instructionSet = [
             return new Template(`
             var $global = ${bigObjectLikeInstancesArg}[0];
             ${pushArg}(${stateArg}, $global[${popArg}(${stateArg})]);
-            `)
+            `);
         },
     },
     {
@@ -722,7 +722,7 @@ export const instructionSet = [
             return new Template(`
             var $address = ${popArg}(${stateArg});
             ${stateArg}.${stateArrayPropKey}[1].${catchAddressPropKey} = $address;
-            `)
+            `);
         },
     },
     {
@@ -738,7 +738,7 @@ export const instructionSet = [
             return new Template(`
             var $address = ${popArg}(${stateArg});
             ${stateArg}.${stateArrayPropKey}[1].${finallyAddressPropKey} = $address;
-            `)
+            `);
         },
     },
     {
@@ -760,7 +760,7 @@ export const instructionSet = [
               var $state = ${stateIndex1GetterArg}(${stateArg});
               return $state != null && $state.${funcResultObjectPropKey} && $bytecodeReturn(${stateArg}, $state.${funcResultObjectPropKey}.${anyObjectPropSubPropKey})
             }
-            `)
+            `);
         },
     },
     {
@@ -776,7 +776,7 @@ export const instructionSet = [
             var $exceptionHandler = ${stateRelatedFunctionsArg}[1]
               , $error = ${popArg}(${stateArg});
             $exceptionHandler(${stateArg}, $error)
-            `)
+            `);
         },
     },
     {
@@ -791,7 +791,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${stateArg}.${errorObjectPropKey} && ${stateArg}.${errorObjectPropKey}.${anyObjectPropSubPropKey});
-            `)
+            `);
         },
     },
     {
@@ -804,7 +804,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${stateArg}.${errorObjectPropKey} = void 0;
-            `)
+            `);
         },
     },
     {
@@ -819,7 +819,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             ${pushArg}(${stateArg}, ${stateArg}.${stateArrayPropKey}[1].${currentThisPropKey});
-            `)
+            `);
         },
     },
     {
@@ -834,7 +834,7 @@ export const instructionSet = [
             var $bytecodeReturn = ${stateRelatedFunctionsArg}[0],
                 $value = ${popArg}(${stateArg});
             return $bytecodeReturn(${stateArg}, $value);
-            `)
+            `);
         },
     },
     {
@@ -847,7 +847,7 @@ export const instructionSet = [
             return new Template(`
             var $bytecodeReturn = ${stateRelatedFunctionsArg}[0];
             return $bytecodeReturn(${stateArg}, void 0);
-            `)
+            `);
         },
     },
     {
@@ -863,7 +863,7 @@ export const instructionSet = [
               , $items = [];
             for (var item in $object) $items.push(item);
             ${pushArg}(${stateArg}, $items);
-            `)
+            `);
         },
     },
     {
@@ -877,7 +877,7 @@ export const instructionSet = [
             return new Template(`
             var $asyncCommon = ${bigObjectLikeInstancesArg}[1];
             ${pushArg}(${stateArg}, $asyncCommon[0]);
-            `)
+            `);
         },
     },
     {
@@ -891,7 +891,7 @@ export const instructionSet = [
             return new Template(`
             var $asyncCommon = ${bigObjectLikeInstancesArg}[1];
             ${pushArg}(${stateArg}, $asyncCommon[1]);
-            `)
+            `);
         },
     },
     {
@@ -905,7 +905,7 @@ export const instructionSet = [
             return new Template(`
             var $func = ${popArg}(${stateArg});
             ${pushArg}(${stateArg}, $func());
-            `)
+            `);
         },
     },
     {
@@ -920,7 +920,7 @@ export const instructionSet = [
             var $func = ${popArg}(${stateArg}),
                 $arg1 = ${popArg}(${stateArg});
             ${pushArg}(${stateArg}, $func($arg1));
-            `)
+            `);
         },
     },
     {
@@ -936,7 +936,7 @@ export const instructionSet = [
                 $arg1 = ${popArg}(${stateArg}),
                 $arg2 = ${popArg}(${stateArg});
             ${pushArg}(${stateArg}, $func($arg1, $arg2));
-            `)
+            `);
         },
     },
     {

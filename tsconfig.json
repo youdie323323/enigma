@@ -11,5 +11,11 @@
     "noImplicitAny": false,
     "strictNullChecks": false
   },
-  "include": ["Sources/**/*"]
+  "include": [
+    "Sources/**/*", 
+    "test/**/*", 
+    "eslint.config.mjs",
+    "ApplicationTest.ts",
+    "index.d.ts",
+  ]
 }

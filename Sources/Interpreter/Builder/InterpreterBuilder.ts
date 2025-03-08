@@ -12,6 +12,7 @@ import { FUNCTION_RESULT_REG } from "../../Compiler/CompilerOperatorCode";
 import type { ArrayVariableEnvironment, FunctionVariableEnvironment, InterpreterDefaultEnvironment, NumberVariableEnvironment, ObjectVariableEnvironment, PropertyKeyEnvironment, StringVariableEnvironment } from "./InterpreterDefaultEnvironment";
 import type { InstructionAccesibleEnvironment, InstructionArgumentEnvironment } from "../../Instruction/InstructionAccesibleEnvironment";
 import { LiteralId } from "../../Compiler/CompilerLiteralId";
+import { BuildingOptions } from "../..";
 
 const LICENSE_PATTERN = /(?:^[!@]|^@(?:preserve|license|copyright)|^\s*(?:MIT|MPL|GPL|LGPL|BSD|ISC|Apache|UNLICENSED)\b|\([Cc]\)|[Ll]icen[cs]e|[Cc]opyright|\u00A9)/m;
 
@@ -32,7 +33,7 @@ export default class InterpreterBuilder {
      * @param bytecode - The compiled bytecode
      * @returns The interpreter code in javascript
      */
-    public async build(bytecode: Bytecode): Promise<string> {
+    public async build(bytecode: Bytecode, options: BuildingOptions): Promise<string> {
         this.variableGenerator.reset();
 
         const interpreterStatements: Array<t.Statement> = new Array();
@@ -288,8 +289,10 @@ export default class InterpreterBuilder {
 
             comments: false,
 
-            // Dont remove license
-            shouldPrintComment: (val) => LICENSE_PATTERN.test(val),
+            shouldPrintComment: (val) =>
+                options.removeLicenseComments ?
+                    false :
+                    LICENSE_PATTERN.test(val),
         });
 
         return unraw(transformedCode);
@@ -383,7 +386,7 @@ export default class InterpreterBuilder {
             `   if (result === literalIds[${randomizedLiteralIds.indexOf(LiteralId.False)}]) return !1;`,
         ]).concat(
             "   return vmState[result >> 5]",
-            "}"
+            "}",
         );
 
         return new Template(`
@@ -416,7 +419,7 @@ export default class InterpreterBuilder {
                     encodedBytecode,
                     table,
                     radix,
-                }
+                },
             ),
         ];
     }

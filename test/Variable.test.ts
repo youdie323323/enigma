@@ -1,4 +1,4 @@
-import { executeCode, executeShouldThrownCode, window } from "./__setup__";
+import { executeCode, window } from "./__setup__";
 
 describe("Variable tests", () => {
     test("Variables can read & write correctly", async () => {

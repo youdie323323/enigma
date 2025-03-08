@@ -179,7 +179,7 @@ describe("Regenerator runtime tests", () => {
     
             expect(window.result).toEqual([
                 { value: 1, done: false },
-                { value: 'end', done: true }
+                { value: 'end', done: true },
             ]);
         });
     

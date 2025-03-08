@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
-import { compiler, deleteTestResult, interpreterBuilder, window } from "../__setup__";
+import { deleteTestResult, window } from "../__setup__";
+import { obfuscate } from "../..";
 
 const SOURCE_JS = readFileSync(join(__dirname, "./Dynamic.src.js"), "utf-8");
 
@@ -9,16 +10,15 @@ test("Dynamic.src.js", async () => {
     deleteTestResult();
 
     var value = "never_called";
+
     function input(x) {
         value = x;
     }
+    
     window.input = input;
 
     // Eval depends on scope, so we can expand code within here instead using executeCode
-    compiler.compile(SOURCE_JS);
-
-    const bytecode = compiler.constructBytecode();
-    const compiledCode = await interpreterBuilder.build(bytecode);
+    const compiledCode = await obfuscate(SOURCE_JS);
 
     try {
         eval(compiledCode);

@@ -41,28 +41,55 @@ $ npm install enigma-vm
 ### Usage Example
 
 ```ts
-import { Compiler, InterpreterBuilder } from "enigma-vm";
+import { obfuscate } from "enigma-vm";
 
 (async function () {
-  const compiler = new Compiler();
+    const input = `
+      function sayHello(name) {
+          console.log("Hello,", name + "!");
+      }
 
-  const input = `
-    function sayHello(name) {
-        console.log("Hello,", name + "!");
-    }
+      for (let i = 0; i < 3; i++) {
+          sayHello("Me and " + i);
+      }
+    `;
 
-    for (let i = 0; i < 3; i++) {
-        sayHello("Me and " + i);
-    }
-  `;
+    const obfuscatedInput = await obfuscate(input);
 
-  compiler.compile(input);
-
-  const bytecode = compiler.constructBytecode();
-  const code = await new InterpreterBuilder().build(bytecode);
-
-  console.log(code);
+    console.log(obfuscatedInput);
 })();
+```
+
+## ⚙️ Options
+
+Enigma provides customization options to control the compilation process.  
+These options can be passed as the second argument to the `obfuscate` method.
+
+### 🛠 Compile Options
+These options affect how your code is compiled into bytecode:
+
+- **`stripFunctionName` (boolean)**: Removes function names during compilation.
+  - `true`: Function names will be removed (e.g., `myFunction.name → ""`).
+  - `false`: Function names will be preserved (e.g., `myFunction.name → "myFunction"`).
+
+### 🔧 Build Options
+These options control the final output of the compiled bytecode:
+
+- **`removeLicenseComments` (boolean)**: Determines whether license comments should be removed from the compiled code.
+  - `true`: License comments will be removed.
+  - `false`: License comments will be kept.
+
+### 📌 Example Usage
+
+```ts
+const obfuscatedInput = await obfuscate(input, {
+  compileOptions: {
+    stripFunctionName: true,
+  },
+  buildOptions: {
+    removeLicenseComments: false,
+  },
+});
 ```
 
 ## 🎭 Interpreter

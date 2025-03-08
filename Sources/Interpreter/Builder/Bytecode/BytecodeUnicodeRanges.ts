@@ -329,7 +329,7 @@ export enum Category {
     Tags = "Tags",
     VariationSelectorsSupplement = "Variation Selectors Supplement",
     SupplementalPrivateUseAreaA = "Supplemental Private Use Area-A",
-    SupplementalPrivateUseAreaB = "Supplemental Private Use Area-B"
+    SupplementalPrivateUseAreaB = "Supplemental Private Use Area-B",
 }
 
 const UNICODE_RANGES = {
@@ -673,5 +673,6 @@ export function generateRandomStringFromCategory(category: Category): string {
     }
 
     const [start, end] = range;
+
     return String.fromCharCode(Math.floor(Math.random() * (end - start + 1)) + start);
 }

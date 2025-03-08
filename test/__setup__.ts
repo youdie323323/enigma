@@ -1,9 +1,7 @@
 import { writeFileSync } from "fs";
-import { Compiler, InterpreterBuilder } from "../";
+import { Compiler, InterpreterBuilder, obfuscate } from "../";
 
 export let window: any;
-export let compiler: Compiler;
-export let interpreterBuilder: InterpreterBuilder;
 
 const originalWindowProps: Set<string> = new Set();
 
@@ -20,16 +18,59 @@ beforeAll(() => {
 
     window = {
         document,
-        Array, Object, Symbol, Number, Boolean, String, Date, RegExp, Error,
-        Math, JSON, Promise,
-        Int8Array, Uint8Array, Uint8ClampedArray, Int16Array, Uint16Array,
-        Int32Array, Uint32Array, Float32Array, Float64Array, BigInt64Array,
-        BigUint64Array, parseInt, parseFloat, isNaN, isFinite, decodeURI,
-        decodeURIComponent, encodeURI, encodeURIComponent, escape, unescape,
-        eval, setTimeout, clearTimeout, setInterval, clearInterval,
-        Map, Set, WeakMap, WeakSet, ArrayBuffer, SharedArrayBuffer,
-        Atomics, DataView, Intl, WebAssembly, Function, BigInt,
-        Reflect, Proxy, $: false,
+        Array,
+        Object,
+        Symbol,
+        Number,
+        Boolean,
+        String,
+        Date,
+        RegExp,
+        Error,
+        Math,
+        JSON,
+        Promise,
+        Int8Array,
+        Uint8Array,
+        Uint8ClampedArray,
+        Int16Array,
+        Uint16Array,
+        Int32Array,
+        Uint32Array,
+        Float32Array,
+        Float64Array,
+        BigInt64Array,
+        BigUint64Array,
+        parseInt,
+        parseFloat,
+        isNaN,
+        isFinite,
+        decodeURI,
+        decodeURIComponent,
+        encodeURI,
+        encodeURIComponent,
+        escape,
+        unescape,
+        eval,
+        setTimeout,
+        clearTimeout,
+        setInterval,
+        clearInterval,
+        Map,
+        Set,
+        WeakMap,
+        WeakSet,
+        ArrayBuffer,
+        SharedArrayBuffer,
+        Atomics,
+        DataView,
+        Intl,
+        WebAssembly,
+        Function,
+        BigInt,
+        Reflect,
+        Proxy,
+        $: false,
     };
 
     window.window = window;
@@ -41,12 +82,9 @@ beforeAll(() => {
     Object.keys(window).forEach(prop => {
         originalWindowProps.add(prop);
     });
-
-    compiler = new Compiler();
-    interpreterBuilder = new InterpreterBuilder();
 });
 
-function safelyEndTesting(failedCode: string, failError: Error): void {
+function safelyEndTesting(failedCode: string, failError: Error): never {
     writeFileSync("dev.output.js", failedCode, {
         encoding: "utf-8",
     });
@@ -70,10 +108,7 @@ export const executeCode = async (code: string): Promise<void> => {
     // Ensure all tests result deleted before
     deleteTestResult();
 
-    compiler.compile(code);
-
-    const bytecode = compiler.constructBytecode();
-    const compiledCode = await interpreterBuilder.build(bytecode);
+    const compiledCode = await obfuscate(code);
 
     try {
         eval(compiledCode);
@@ -89,10 +124,7 @@ export const executeShouldThrownCode = async (code: string): Promise<unknown> =>
 
     let thrownError: unknown;
 
-    compiler.compile(code);
-
-    const bytecode = compiler.constructBytecode();
-    const compiledCode = await interpreterBuilder.build(bytecode);
+    const compiledCode = await obfuscate(code);
 
     try {
         eval(compiledCode);

@@ -21,7 +21,7 @@ export function defaultHash<A extends unknown[], H extends unknown>(...args: A):
 
 export function memo<A extends unknown[], R extends unknown, T extends unknown, H extends unknown>(
     fn: MemoizableFunction<A, R, T>,
-    opts: MemoizeOptions<A, R, H> = {}
+    opts: MemoizeOptions<A, R, H> = {},
 ): MemoizableFunction<A, R, T> {
     const { hash = defaultHash, cache = new Map<H, R>() } = opts;
 
@@ -32,7 +32,7 @@ export function memo<A extends unknown[], R extends unknown, T extends unknown, 
         let result = fn.apply(this, args);
         if (result instanceof Promise) {
             result = <R>result.catch(error => {
-                cache.delete(id)
+                cache.delete(id);
                 throw error;
             });
         }

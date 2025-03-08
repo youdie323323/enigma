@@ -6,10 +6,11 @@ import Template from "../Templates/Template";
 
 export const shuffle = <T>(array: T[]): T[] => {
     return array.toSorted(() => Math.random() - 0.5);
-}
+};
 
 export default class BytecodeTranscodingProvider {
     private static readonly REPLACEABLE_CHARSET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
     private static readonly UNICODE_CHARACTERS: Record<string, string> = {
         A: 'Α',
         B: 'Β',
@@ -78,7 +79,7 @@ export default class BytecodeTranscodingProvider {
         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
         'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
         's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-        '|', '~'
+        '|', '~',
     ] as const;
     // This is what i got from fetching ips 5000 times
     private static readonly NON_BASIC_TABLE_CATEGORIES_WEIGHTS: Partial<Record<Category, number>> = {
@@ -106,6 +107,7 @@ export default class BytecodeTranscodingProvider {
 
     private static replaceCharAtIndex(str: string, index: number, char: string) {
         if (index > str.length - 1) return str;
+
         return str.substring(0, index) + char + str.substring(index + 1);
     }
 
@@ -154,6 +156,7 @@ export default class BytecodeTranscodingProvider {
             }
 
             duplicationCheckerSet.add(randomNonBasicStr);
+
             return randomNonBasicStr;
         });
 
@@ -173,7 +176,7 @@ export default class BytecodeTranscodingProvider {
     public static encode(
         bytecode: Bytecode,
         table: string,
-        radix: number
+        radix: number,
     ): string {
         let encodedString = '';
         const r = table.length - radix;
@@ -210,7 +213,7 @@ export default class BytecodeTranscodingProvider {
     public static decode(
         encoded: string,
         table: string,
-        radix: number
+        radix: number,
     ): Bytecode {
         const bytecode: Bytecode = new Array();
         const r = table.length - radix;

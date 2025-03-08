@@ -5,9 +5,10 @@
  */
 const chance = (percentChance: number): boolean => {
     return Math.random() < percentChance / 100;
-}
+};
 
 let currentLiteralId: number = Math.floor(Math.random() * 6) + 1;
+
 // To prevent register access blocking, atleast we need to ensure that value is not above 64 (FUNCTION_RESULT_REG << 5)
 function nextLiteralId(): number {
     if (chance(15)) {
@@ -22,7 +23,7 @@ function nextLiteralId(): number {
         currentLiteralId += 3.8;
     }
 
-    return currentLiteralId << 1
+    return currentLiteralId << 1;
 }
 
 export enum LiteralId {
