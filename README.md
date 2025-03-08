@@ -73,7 +73,7 @@ These options affect how your code is compiled into bytecode:
   - `false`: Function names will be preserved (e.g., `myFunction.name → "myFunction"`).
 
 ### 🔧 Build Options
-These options control the final output of the compiled bytecode:
+These options control the interpreter code:
 
 - **`removeLicenseComments` (boolean)**: Determines whether license comments should be removed from the compiled code.
   - `true`: License comments will be removed.

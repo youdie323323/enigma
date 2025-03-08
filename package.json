@@ -43,7 +43,8 @@
     "@babel/generator": "^7.26.9",
     "@babel/parser": "^7.26.9",
     "@babel/traverse": "^7.26.9",
-    "@babel/types": "^7.26.9"
+    "@babel/types": "^7.26.9",
+    "ts-essentials": "^10.0.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.26.4",
@@ -65,7 +66,6 @@
     "globals": "^15.13.0",
     "jest": "^30.0.0-alpha.6",
     "rimraf": "^6.0.1",
-    "ts-essentials": "^10.0.4",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
