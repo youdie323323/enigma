@@ -135,6 +135,8 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+# BEGIN user-defined ignore
+
 samples/
 
 # Test failed output file
@@ -142,4 +144,6 @@ dev.output.js
 
 Dist/
 
-ApplicationTest.ts
+# ApplicationTest.ts
+
+# eslint.config.mjs

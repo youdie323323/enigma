@@ -101,7 +101,7 @@ export const instructionSet = [
             memoryPropKey,
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
-            ${stateIndex1GetterArg}(${stateArg}).${memoryPropKey}[${popArg}(${stateArg})] = void 0
+            ${stateIndex1GetterArg}(${stateArg}).${memoryPropKey}[${popArg}(${stateArg})] = void 0;
             `);
         },
     },
@@ -116,7 +116,7 @@ export const instructionSet = [
             memoryPropKey,
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
-            ${stateIndex1GetterArg}(${stateArg}).${memoryPropKey}[${popArg}(${stateArg})] = ${popArg}(${stateArg})
+            ${stateIndex1GetterArg}(${stateArg}).${memoryPropKey}[${popArg}(${stateArg})] = ${popArg}(${stateArg});
             `);
         },
     },
@@ -135,7 +135,7 @@ export const instructionSet = [
             return new Template(`
             for (var $varName = ${popArg}(${stateArg}), $currentState = ${stateIndex1GetterArg}(${stateArg}); $currentState; $currentState = $currentState.${parentMemoryPropKey}) 
               if ($varName in $currentState.${memoryPropKey}) {
-                ${pushArg}(${stateArg}, $currentState.${memoryPropKey}[$varName])
+                ${pushArg}(${stateArg}, $currentState.${memoryPropKey}[$varName]);
                 return;
               } 
             throw 'ball';
@@ -156,7 +156,7 @@ export const instructionSet = [
             return new Template(`
             for (var $varName = ${popArg}(${stateArg}), $value = ${popArg}(${stateArg}), $currentState = ${stateIndex1GetterArg}(${stateArg}); $currentState; $currentState = $currentState.${parentMemoryPropKey}) 
               if ($varName in $currentState.${memoryPropKey}) {
-                $currentState.${memoryPropKey}[$varName] = $value
+                $currentState.${memoryPropKey}[$varName] = $value;
                 return;
               } 
             throw 'ball';
@@ -192,7 +192,7 @@ export const instructionSet = [
             stateArrayPropKey,
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
-            ${stateArg}.${stateArrayPropKey}[0] = ${popArg}(${stateArg})
+            ${stateArg}.${stateArrayPropKey}[0] = ${popArg}(${stateArg});
             `);
         },
     },
@@ -207,7 +207,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             var $address = ${popArg}(${stateArg});
-            ${popArg}(${stateArg}) ? ${stateArg}.${stateArrayPropKey}[0] = $address : $address
+            ${popArg}(${stateArg}) ? ${stateArg}.${stateArrayPropKey}[0] = $address : $address;
             `);
         },
     },
@@ -222,7 +222,7 @@ export const instructionSet = [
         }: InstructionAccesibleEnvironment): Template {
             return new Template(`
             var $address = ${popArg}(${stateArg});
-            ${popArg}(${stateArg}) ? $address : ${stateArg}.${stateArrayPropKey}[0] = $address
+            ${popArg}(${stateArg}) ? $address : ${stateArg}.${stateArrayPropKey}[0] = $address;
             `);
         },
     },
@@ -280,7 +280,7 @@ export const instructionSet = [
               ${randomFuncPropAddrPropKey}: $address,
               ${parentMemoryPropKey}: $parentState,
               ${randomFuncPropFuncPropKey}: $targetFunc
-            }, ${pushArg}(${stateArg}, $targetFunc)
+            }, ${pushArg}(${stateArg}, $targetFunc);
             `);
         },
     },
